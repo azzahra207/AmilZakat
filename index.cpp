@@ -19,38 +19,44 @@ void menu(){
 }
 int main(){
     pengguna pengguna;
-    bool HaveAccount;
+    char HaveAccount;
+    bool isLogin=false;
     cout << "=== SELAMAT DATANG ===" << endl;
     cout << "=== APLIKASI AMIL ZAKAT ===" << endl;
-    cout << "Sudah Punya Akun (true/false)? " << endl;
-    cin >> boolalpha >> HaveAccount;
-    if(HaveAccount){
-        string username;
-        string password;
+    system("pause");
+    do{
+    system("cls");
+    cout << "Sudah Punya Akun (Y/T)? " << endl;
+    cin >> HaveAccount;
+    if(HaveAccount=='Y' || HaveAccount=='y'){
+        string user[2];
         cout <<"--- Login Akun ---"<< endl;
         cout << "Username: ";
-        cin >> username;
+        cin >> user[0];
         cout << "Password: ";
-        cin >> password;
+        cin >> user[1];
         ifstream bacaUser1;
-        bool isLogin=false;
         bacaUser1.open("users.txt");
         while(bacaUser1 >> pengguna.id >> pengguna.username >> pengguna.password){
-            if(pengguna.username==username && password == pengguna.password){
+            if(pengguna.username==user[0] && user[1] == pengguna.password){
                 isLogin=true;
-                cout << "Berhasil Login";
                 break;
             }
         }
         bacaUser1.close();
+        system("cls");
+        if(isLogin){
+            cout << pengguna.username << " berhasil Login\n";
+        }else{
+            cout << "Akun tidak ditemukan\n";
+        }       
     } else{
         ifstream bacaUser2;
-        int lastId=0;
+        pengguna.id=1;
         bacaUser2.open("users.txt");
-        while(bacaUser2 >> lastId >> pengguna.username >> pengguna.password){
-            pengguna.id=lastId;
+        while(bacaUser2 >> pengguna.id >> pengguna.username >> pengguna.password){
+            pengguna.id++;
         }
-        pengguna.id++;
         bacaUser2.close();
         ofstream appendUser1;
         appendUser1.open("users.txt", ios::app);
@@ -61,6 +67,11 @@ int main(){
         cin >> pengguna.password;
         appendUser1 << pengguna.id << " " << pengguna.username << " " << pengguna.password << "\n";
         appendUser1.close();
+        system("cls");
+        cout << pengguna.username<< " Berhasil Register\n";
+        isLogin=true;
     }
-
+    system("pause");
+}while(!isLogin);
+    menu();
 }
