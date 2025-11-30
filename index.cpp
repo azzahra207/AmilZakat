@@ -28,8 +28,8 @@ int main(){
     system("cls");
     cout << "Sudah Punya Akun (Y/T)? " << endl;
     cin >> HaveAccount;
+    string user[2];
     if(HaveAccount=='Y' || HaveAccount=='y'){
-        string user[2];
         cout <<"--- Login Akun ---"<< endl;
         cout << "Username: ";
         cin >> user[0];
@@ -51,25 +51,38 @@ int main(){
             cout << "Akun tidak ditemukan\n";
         }       
     } else{
-        ifstream bacaUser2;
-        pengguna.id=1;
-        bacaUser2.open("users.txt");
-        while(bacaUser2 >> pengguna.id >> pengguna.username >> pengguna.password){
-            pengguna.id++;
-        }
-        bacaUser2.close();
-        ofstream appendUser1;
-        appendUser1.open("users.txt", ios::app);
         cout <<"--- Registrasi Akun ---"<< endl;
         cout << "Username: ";
         cin >> pengguna.username;
         cout << "Password: ";
         cin >> pengguna.password;
-        appendUser1 << pengguna.id << " " << pengguna.username << " " << pengguna.password << "\n";
-        appendUser1.close();
+        ifstream bacaUser3;
+        bool isUnique=true;
+        bacaUser3.open("users.txt");
+        while(bacaUser3 >> pengguna.id >> user[0] >> user[1]){
+            if(user[0]==pengguna.username){
+                cout << "username sudah digunakan, coba username lain\n";
+                isUnique=false;
+                break;
+            }
+        }
+        if(isUnique){
+            ifstream bacaUser2;
+            pengguna.id=1;
+            bacaUser2.open("users.txt");
+            while(bacaUser2 >> pengguna.id >> user[0] >> user[1]){
+                pengguna.id++;
+            }
+            bacaUser2.close();
+            ofstream appendUser1;
+            appendUser1.open("users.txt", ios::app);
+            appendUser1 << pengguna.id << " " << pengguna.username << " " << pengguna.password << "\n";
+            appendUser1.close();
+            cout << pengguna.username<< " Berhasil Register\n";
+            isLogin=true;
+        }
+        bacaUser3.close();
         system("cls");
-        cout << pengguna.username<< " Berhasil Register\n";
-        isLogin=true;
     }
     system("pause");
 }while(!isLogin);
