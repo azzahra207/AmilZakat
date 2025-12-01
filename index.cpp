@@ -8,22 +8,85 @@ struct pengguna{
     string username;
     string password;
 };
-void menu(){
+int menu(pengguna &user){
     system("cls");
+    int hasil;
     cout << "=== BERANDA AMIL ZAKAT ==="<<endl;
+    if(user.username=="AmilZakat"){
+        cout << "1. Manajemen Pembayaran Zakat\n";
+        cout << "2. Penyaluran Zakat\n";
+        cout << "3. Monitoring Saldo Zakat\n";
+    } else{
     cout << "=== MENU UTAMA ==="<<endl;
     cout <<"1. Dashboard\n";
     cout <<"2. Bayar Zakat\n";
     cout <<"3. Kalkulator zakat\n";
-    cout <<"Pilih nomor: ";
 }
+    cout <<"4. Logout\n";
+    cout <<"Pilih nomor: ";
+    cin >> hasil;
+    return hasil;
+}
+void handleMenu(pengguna &user){
+    bool isAdmin=user.username=="AmilZakat";
+    int pilihanMenu;
+    while(true){
+        pilihanMenu=menu(user);
+        switch(pilihanMenu){
+            case 1:
+                if(isAdmin){
+                }else{
+
+                }
+            break;
+            case 2:
+                if(isAdmin){
+                }else{
+
+                }
+            break;
+            case 3:
+                if(isAdmin){
+                }else{
+
+                }
+            break;
+            case 4:
+                user = pengguna();
+                cout << "Logout..\n";
+            return;
+            default:
+                cout << "Pemilihan nomor tidak valid\n";
+                system("pause");
+                break;
+        };
+    };
+}
+
 int main(){
     pengguna pengguna;
+    bool adaAdmin = false;
+    int id;
+    string uname, pass;
+    ifstream cek;
+    cek.open("users.txt");
+    while(cek >> id >> uname >> pass){
+        if(uname == "AmilZakat") 
+        adaAdmin = true;
+    }
+    cek.close();
+
+    if(!adaAdmin){
+        ofstream tulis("users.txt");
+        tulis << 1 << " AmilZakat insyaAllahBarokah_2025\n";
+        tulis.close();
+    }
     char HaveAccount;
-    bool isLogin=false;
     cout << "=== SELAMAT DATANG ===" << endl;
     cout << "=== APLIKASI AMIL ZAKAT ===" << endl;
     system("pause");
+    while(true){
+        bool isLogin=false;
     do{
     system("cls");
     cout << "Sudah Punya Akun (Y/T)? " << endl;
@@ -82,9 +145,18 @@ int main(){
             isLogin=true;
         }
         bacaUser3.close();
-        system("cls");
     }
     system("pause");
 }while(!isLogin);
-    menu();
+handleMenu(pengguna);
+    char isQuit;
+    cout << "Apakah Anda ingin keluar? (Y?T): ";
+    cin >> isQuit;
+    if(isQuit=='Y' || isQuit=='y'){
+        break;
+    } else{
+        continue;
+    }
+}
+cout <<"Selesai"<<endl;
 }
