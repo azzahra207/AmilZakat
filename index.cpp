@@ -8,31 +8,7 @@ struct pengguna{
     string username;
     string password;
 };
-struct penghasilan{
-    int id;
-    int id_user;
-    string pekerjaan;
-    long long pendapatan;
-    long long piutang; // yang kira-kira bisa ditagih
-};
-struct kebutuhan{
-    int id;
-    int id_user;
-    long long modal;
-    long long hutang;
-    long long kebutuhan;
-};
-struct hartaLain{
-    int id;
-    int id_user;
-    int id_perhiasan;
-    int id_tani; //bahan pangan pokok
-    int id_tanaman;
-    int id_ternak;
-    int id_penghasilan;
-    int id_properti;
-    int id_rikaz;
-};
+
 struct dataNisab{
     string jenis[15]= {
         "perhiasan",
@@ -137,7 +113,66 @@ struct dataNisab{
         20
     }; // satuan %
     };
-
+struct penghasilan{
+    int id;
+    int id_user;
+    string pekerjaan;
+    long long modal;
+    long long gajiBulanan;
+    long long piutang; // yang kira-kira bisa ditagih
+    long long hutang;
+    long long kebutuhan;
+    bool wajibZakat;
+};
+struct perhiasan{
+    int id;
+    int id_user;
+    string nama;
+    float berat; // gr
+    long long hargaPerGram; // gr
+    bool wajibZakat;
+};
+struct tani{
+    int id;
+    int id_user;
+    string jenis;
+    float berat; // kg
+    bool bayarIrigasi;
+    bool wajibZakat;
+};
+struct tanaman{
+    int id;
+    int id_user;
+    long long bibit;
+    long long nuqud;
+    long long piutang;
+    long long hutang;
+    bool wajibZakat;
+};
+struct properti{
+    int id;
+    int id_user;
+    long long biayaTanah; 
+    long long biayaTanahBangunan; 
+    long long biayaBahanBaku; 
+    long long nuqud; 
+    long long piutang;
+    long long hutang;
+    bool wajibZakat;
+};
+struct rikaz{
+    int id;
+    int id_user;
+    string barang;
+    long long hargaBarang; //dikira-kira dalam rupiah
+};
+struct ternak{
+    int id;
+    int id_user;
+    string jenis; // kambing / sapi / unta
+    int jumlah; 
+    bool wajibZakat;
+};
 int menu(pengguna &user){
     system("cls");
     int hasil;
@@ -214,6 +249,79 @@ int autoIncrement(string nameFile){
     bacaDatabase2.close();
     return hasilId;
 }
+string Rupiah(long long uang){
+    string strUang =to_string(uang);
+    string hasil;
+    int sizeUang=strUang.length();
+    for(int i=0;i<sizeUang;i++){
+        hasil = strUang[(sizeUang-i)-1]+hasil;
+        if((i+1)%3==0 && sizeUang-i>1){
+            hasil = "."+hasil;
+        }
+    }
+    return "Rp. "+hasil;
+}
+long long cariNisabLong(string nama){
+    dataNisab datanisab;
+    long long nisab;
+    for(int i=0;i<15;i++){
+        if(datanisab.nama[i]==nama){
+            nisab=(long long)datanisab.nisab[i];
+            break;
+        }
+    }
+    return nisab;
+}
+float cariNisabFloat(string nama){
+    dataNisab datanisab;
+    float nisab;
+    for(int i=0;i<15;i++){
+        if(datanisab.nama[i]==nama){
+            nisab=datanisab.nisab[i];
+            break;
+        }
+    }
+    return nisab;
+}
+float cariZakatFloat(string nama){
+    dataNisab datanisab;
+    float wajibZakat;
+    for(int i=0;i<15;i++){
+        if(datanisab.nama[i]==nama){
+            wajibZakat=datanisab.wajibZakat[i];
+            break;
+        }
+    }
+    return wajibZakat/100;
+}
+long long zakatPenghasilan(penghasilan &row){
+    long long nisab = cariNisabLong("perusahaan");
+    long long bruto = row.gajiBulanan*12+row.piutang;
+    long long netto = bruto-(row.kebutuhan+row.hutang+row.modal);
+    if(netto>=nisab){
+        row.wajibZakat=true;
+        return (long long)(cariZakatFloat("perusahaan")*netto);
+    } else{
+        row.wajibZakat=false;
+        return 0;
+    }
+};
+long long zakatPerhiasan(perhiasan &row){
+    string namaHarta=row.nama;
+    float nisab;
+    if(namaHarta=="emas"){
+        nisab=cariNisabFloat("emas");
+    } else{
+        nisab=cariNisabFloat("perak");
+    }
+    if(row.berat>=nisab){
+        row.wajibZakat=true;
+        return (long long)((cariZakatFloat(namaHarta)*row.berat)*row.hargaPerGram);
+    } else{
+        return 0;
+    }
+};
+
 int main(){
     dataNisab dataNisab;
     ofstream catatNisab;
