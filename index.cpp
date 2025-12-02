@@ -8,6 +8,136 @@ struct pengguna{
     string username;
     string password;
 };
+struct penghasilan{
+    int id;
+    int id_user;
+    string pekerjaan;
+    long long pendapatan;
+    long long piutang; // yang kira-kira bisa ditagih
+};
+struct kebutuhan{
+    int id;
+    int id_user;
+    long long modal;
+    long long hutang;
+    long long kebutuhan;
+};
+struct hartaLain{
+    int id;
+    int id_user;
+    int id_perhiasan;
+    int id_tani; //bahan pangan pokok
+    int id_tanaman;
+    int id_ternak;
+    int id_penghasilan;
+    int id_properti;
+    int id_rikaz;
+};
+struct dataNisab{
+    string jenis[15]= {
+        "perhiasan",
+        "perhiasan",
+        "tani",
+        "tani",
+        "tani",
+        "tani",
+        "tani",
+        "tanaman",
+        "ternak",
+        "ternak",
+        "ternak",
+        "ternak",
+        "penghasilan",
+        "properti",
+        "rikaz"
+    };
+    string nama[15] = {
+        "emas",
+        "perak",
+        "beras_putih",
+        "padi_gagang",
+        "padi_kretek",
+        "kacang_hijau",
+        "kacang_tunggak",
+        "tanaman_produktif_dan_perikanan",
+        "sapi",
+        "kambing",
+        "unta",
+        "ternak_lain",
+        "perusahaan",
+        "properti",
+        "barang_temuan",
+    };
+    float nisab[15] = {
+        77.5,
+        543.35,
+        815.758,
+        1631.516,
+        1323.132,
+        780.036,
+        756.697,
+        174970433,
+        30,
+        40,
+        5,
+        174970433,
+        174970433,
+        174970433,
+        0,
+    };
+    string satuan[15] = {
+        "gr",
+        "gr",
+        "kg",
+        "kg",
+        "kg",
+        "kg",
+        "kg",
+        "rupiah",
+        "ekor",
+        "ekor",
+        "ekor",
+        "rupiah",
+        "rupiah",
+        "rupiah",
+        "-",
+    };
+    string haul[15] = {
+        "pertahun",
+        "pertahun",
+        "perpanen",
+        "perpanen",
+        "perpanen",
+        "perpanen",
+        "perpanen",
+        "perpanen",
+        "pertahun",
+        "pertahun",
+        "pertahun",
+        "pertahun",
+        "pertahun",
+        "pertahun",
+        "langsung"
+    };
+    float wajibZakat[15] = {
+        2.5,
+        2.5,
+        5, // jika irigasi berbayar
+        5, // jika irigasi berbayar
+        5, // jika irigasi berbayar
+        5, // jika irigasi berbayar
+        5, // jika irigasi berbayar
+        2.5,
+        0, // menyesuaikan fungsi
+        0, // menyesuaikan fungsi
+        0, // menyesuaikan fungsi
+        2.5,
+        2.5,
+        2.5,
+        20
+    }; // satuan %
+    };
+
 int menu(pengguna &user){
     system("cls");
     int hasil;
@@ -27,6 +157,9 @@ int menu(pengguna &user){
     cin >> hasil;
     return hasil;
 }
+int menuDashboard(pengguna user){
+
+}
 void handleMenu(pengguna &user){
     bool isAdmin=user.username=="AmilZakat";
     int pilihanMenu;
@@ -36,7 +169,15 @@ void handleMenu(pengguna &user){
             case 1:
                 if(isAdmin){
                 }else{
-
+                    cout << "=== DASHBOARD ==="<<endl;
+                    cout << "Nama : "<< user.username<<endl;
+                    cout << "Penghasilan : "<<endl;
+                    cout << "Harta Lainnya : "<<endl;
+                    cout << "Total Kebutuhan : "<<endl;
+                    cout << "Wajib Zakat : "<<endl;
+                    cout << "Status : "<<endl;
+                    cout << "Berhak menerima Zakat : "<<endl;
+                    menuDashboard(user);
                 }
             break;
             case 2:
@@ -62,8 +203,25 @@ void handleMenu(pengguna &user){
         };
     };
 }
-
+int autoIncrement(string nameFile){
+    ifstream bacaDatabase2;
+    int hasilId=1;
+    string data[2];
+    bacaDatabase2.open(nameFile);
+    while(bacaDatabase2 >> hasilId >> data[0] >> data[1]){
+        hasilId++;
+    }
+    bacaDatabase2.close();
+    return hasilId;
+}
 int main(){
+    dataNisab dataNisab;
+    ofstream catatNisab;
+    catatNisab.open("dataNisab.txt");
+    for(int i=0;i<15;i++){
+        catatNisab << i+1 <<" "<< dataNisab.jenis[i] <<" "<< dataNisab.nama[i] <<" "<< dataNisab.nisab[i] <<" "<< dataNisab.satuan[i] <<" "<< dataNisab.haul[i] <<" "<< dataNisab.wajibZakat[i] <<" "<<endl;
+    }
+    catatNisab.close();
     pengguna pengguna;
     bool adaAdmin = false;
     int id;
@@ -130,13 +288,7 @@ int main(){
             }
         }
         if(isUnique){
-            ifstream bacaUser2;
-            pengguna.id=1;
-            bacaUser2.open("users.txt");
-            while(bacaUser2 >> pengguna.id >> user[0] >> user[1]){
-                pengguna.id++;
-            }
-            bacaUser2.close();
+            pengguna.id=autoIncrement("users.txt");
             ofstream appendUser1;
             appendUser1.open("users.txt", ios::app);
             appendUser1 << pengguna.id << " " << pengguna.username << " " << pengguna.password << "\n";
