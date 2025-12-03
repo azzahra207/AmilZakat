@@ -120,7 +120,7 @@ struct penghasilan{
     long long modal;
     long long gajiBulanan;
     long long piutang; // yang kira-kira bisa ditagih
-    long long hutang;
+    long long utang;
     long long kebutuhan;
     bool wajibZakat;
 };
@@ -135,7 +135,7 @@ struct perhiasan{
 struct tani{
     int id;
     int id_user;
-    string jenis;
+    string nama;
     float berat; // kg
     bool bayarIrigasi;
     bool wajibZakat;
@@ -146,7 +146,7 @@ struct tanaman{
     long long bibit;
     long long nuqud;
     long long piutang;
-    long long hutang;
+    long long utang;
     bool wajibZakat;
 };
 struct properti{
@@ -157,7 +157,7 @@ struct properti{
     long long biayaBahanBaku; 
     long long nuqud; 
     long long piutang;
-    long long hutang;
+    long long utang;
     bool wajibZakat;
 };
 struct rikaz{
@@ -169,7 +169,7 @@ struct rikaz{
 struct ternak{
     int id;
     int id_user;
-    string jenis; // kambing / sapi / unta
+    string nama; // kambing / sapi / unta
     int jumlah; 
     bool wajibZakat;
 };
@@ -297,7 +297,7 @@ float cariZakatFloat(string nama){
 long long zakatPenghasilan(penghasilan &row){
     long long nisab = cariNisabLong("perusahaan");
     long long bruto = row.gajiBulanan*12+row.piutang;
-    long long netto = bruto-(row.kebutuhan+row.hutang+row.modal);
+    long long netto = bruto-(row.kebutuhan+row.utang+row.modal);
     if(netto>=nisab){
         row.wajibZakat=true;
         return (long long)(cariZakatFloat("perusahaan")*netto);
@@ -308,17 +308,129 @@ long long zakatPenghasilan(penghasilan &row){
 };
 long long zakatPerhiasan(perhiasan &row){
     string namaHarta=row.nama;
-    float nisab;
-    if(namaHarta=="emas"){
-        nisab=cariNisabFloat("emas");
-    } else{
-        nisab=cariNisabFloat("perak");
-    }
+    float nisab=cariNisabFloat(namaHarta);
     if(row.berat>=nisab){
         row.wajibZakat=true;
         return (long long)((cariZakatFloat(namaHarta)*row.berat)*row.hargaPerGram);
     } else{
+        row.wajibZakat=false;
         return 0;
+    }
+};
+long long zakatTanaman(tanaman &row){
+    long long nisab=cariNisabLong("tanaman_produktif_dan_perikanan");
+    long long bruto = row.bibit+row.nuqud+row.piutang;
+    long long netto = bruto - row.utang;
+    if(netto>=nisab){
+        row.wajibZakat=true;
+        return (long long)(cariZakatFloat("tanaman_produktif_dan_perikanan")*netto);
+    } else{
+        row.wajibZakat=false;
+        return 0;
+    }
+};
+float zakatPertanian(tani &row){
+    string namaHarta=row.nama;
+    float nisab=cariNisabFloat(namaHarta);
+    float wajibZakat=cariZakatFloat(namaHarta);
+    if(row.berat>=nisab){
+        row.wajibZakat=true;
+        if(row.bayarIrigasi){
+            return row.berat*wajibZakat;
+        } else{
+            return row.berat*(wajibZakat+0.05);
+        }
+    } else{
+        row.wajibZakat=false;
+        return 0;
+    }
+};
+long long zakatProperti(properti &row){
+    long long nisab=cariNisabLong("properti");
+    float wajibZakat=cariZakatFloat("properti");
+    long long bruto = row.biayaTanah + row.biayaTanahBangunan + row.biayaBahanBaku +row.nuqud + row.piutang;
+    long long netto = bruto - row.utang;
+    if(netto>=nisab){
+        row.wajibZakat=true;
+        return netto*wajibZakat;
+    } else{
+        row.wajibZakat=false;
+        return 0;
+    }
+};
+long long zakatRikaz(rikaz &row){
+    float wajibZakat=cariZakatFloat("barang_temuan");
+    return row.hargaBarang*wajibZakat;
+};
+
+string zakatTernak(ternak &row){
+    float nisab = cariNisabFloat(row.nama);
+    if(row.jumlah>=nisab){
+        row.wajibZakat=true;
+        if(row.nama=="unta"){
+            if(row.jumlah>=140){
+                int jumlahEkor[2]; // usia 3 dan 2 tahun
+                int sisaEkor[2]; // pembagi 50 dan 40
+                string hasil;
+                jumlahEkor[0]=row.jumlah / 50;
+                sisaEkor[0]=row.jumlah%50;
+                jumlahEkor[1]=row.jumlah/40;
+                sisaEkor[1]=row.jumlah%40;
+                int minSisa[3]; // jml50, jml40, sisa
+                if(sisaEkor[0]==0){
+                    hasil="Wajib membayar "+to_string(jumlahEkor[0]);
+                    return hasil +" ekor unta hiqqah (usia 3 tahun)";
+                } else if(sisaEkor[1]==0){
+                    hasil="Wajib membayar "+to_string(jumlahEkor[1]);
+                    return hasil +" ekor unta bintu labun (usia 2 tahun)";
+                }  else {
+                    minSisa[0] = jumlahEkor[0]; // hiqqah
+                    minSisa[1] = 0;             // labun
+                    minSisa[2] = sisaEkor[0];   // sisa
+                                
+                    int tempHiqqah = jumlahEkor[0];
+                    int tempLabun  = 0;
+                    int tempSisa   = sisaEkor[0];
+                                
+                    while(tempHiqqah >= 0) {
+                        tempSisa = row.jumlah - (tempHiqqah * 50 + tempLabun * 40);
+                        while(tempSisa>=40){
+                            tempLabun++;
+                            tempSisa-=40;
+                        }
+                        if(tempSisa < minSisa[2]) {
+                            minSisa[0] = tempHiqqah;
+                            minSisa[1] = tempLabun;
+                            minSisa[2] = tempSisa;
+                        }
+                        if(tempSisa <= 0){
+
+                            break;
+                        }
+                        tempHiqqah--;
+                        tempLabun++;
+                    }
+
+                        hasil = "Wajib membayar " + to_string(minSisa[0]) + " ekor unta hiqqah (usia 3 tahun)";
+                        if(minSisa[1] > 0)
+                            hasil += " dan " + to_string(minSisa[1]) + " ekor unta bintu labun (usia 2 tahun)";
+                        return hasil;
+                    }     
+                
+            } else{
+                return "hehehe";
+            }
+        } else if(row.nama=="sapi"){
+            return "sapi";
+
+        } else if(row.nama=="kambing"){
+            return "kambing";
+        } else {
+            return "input tidak valid";
+        }
+    } else{
+        row.wajibZakat=false;
+        return "Tidak Wajib Membayar Zakat";
     }
 };
 
