@@ -52,13 +52,13 @@ struct dataNisab{
         1323.132,
         780.036,
         756.697,
-        174970433,
+        174970, // ribu
         30,
         40,
         5,
-        174970433,
-        174970433,
-        174970433,
+        174970,
+        174970,
+        174970,
         0,
     };
     string satuan[15] = {
@@ -192,9 +192,9 @@ int menu(pengguna &user){
     cin >> hasil;
     return hasil;
 }
-int menuDashboard(pengguna user){
+// int menuDashboard(pengguna user){
 
-}
+// }
 void handleMenu(pengguna &user){
     bool isAdmin=user.username=="AmilZakat";
     int pilihanMenu;
@@ -212,7 +212,7 @@ void handleMenu(pengguna &user){
                     cout << "Wajib Zakat : "<<endl;
                     cout << "Status : "<<endl;
                     cout << "Berhak menerima Zakat : "<<endl;
-                    menuDashboard(user);
+                    // menuDashboard(user);
                 }
             break;
             case 2:
@@ -417,9 +417,30 @@ string zakatTernak(ternak &row){
                         return hasil;
                     }     
                 
-            } else{
-                return "hehehe";
+            } else if(row.jumlah>120){
+                return "3 ekor unta betina bintu labun (usia 2 tahun)";
+            } else if(row.jumlah>90){
+                return "2 ekor unta betina hiqqah (usia 3 tahun)";
+            } else if(row.jumlah>75){
+                return "2 ekor unta betina bintu labun (usia 2 tahun)";
+            } else if(row.jumlah>60){
+                return "1 ekor unta betina hiqqah (usia 4 tahun)";
+            } else if(row.jumlah>45){
+                return "1 ekor unta betina hiqqah (usia 3 tahun)";
+            } else if(row.jumlah>35){
+                return "1 ekor unta betina bintu labun (usia 2 tahun)";
+            } else if(row.jumlah>24){
+                return "1 ekor unta betina Bintu makhad (usia 1 tahun)";
+            } else if(row.jumlah>19){
+                return "4 ekor kambing umur 2 tahun, atau 4 ekor domba umur 1 tahun";
+            } else if(row.jumlah>14){
+                return "3 ekor kambing umur 2 tahun, atau 3 ekor domba umur 1 tahun";
+            } else if(row.jumlah>9){
+                return "2 ekor kambing umur 2 tahun, atau 2 ekor domba umur 1 tahun";
+            } else {
+                return "1 ekor kambing umur 2 tahun, atau 1 ekor domba umur 1 tahun";
             }
+            
         } else if(row.nama=="sapi"){
             return "sapi";
 
