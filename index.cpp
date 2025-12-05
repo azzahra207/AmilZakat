@@ -277,7 +277,7 @@ float cariZakatFloat(string nama){
     return wajibZakat/100;
 }
 long long zakatPenghasilan(penghasilan &row){
-    long long nisab = cariNisabLong("perusahaan");
+    long long nisab = cariNisabLong("perusahaan")*1000;
     long long bruto = row.gajiBulanan*12+row.piutang;
     long long netto = bruto-(row.kebutuhan+row.utang+row.modal);
     if(netto>=nisab){
@@ -2054,3 +2054,4 @@ handleMenu(pengguna);
 }
 cout <<"Selesai"<<endl;
 }
+
