@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amil Zakat - Kalkulator Zakat C++</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-mosque"></i>
+                <h1>Amil Zakat</h1>
+            </div>
+            <div class="nav-links">
+                <a href="#home">Beranda</a>
+                <a href="#calculator">Kalkulator</a>
+                <a href="#about">Tentang</a>
+                <a href="#features">Fitur</a>
+            </div>
+            <button class="auth-btn" onclick="toggleLogin()">
+                <i class="fas fa-user"></i> Masuk
+            </button>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h2>Kalkulator Zakat Digital</h2>
+            <p class="subtitle">Hitung kewajiban zakat Anda dengan aplikasi C++ yang berjalan di browser</p>
+            <div class="hero-stats">
+                <div class="stat">
+                    <i class="fas fa-calculator"></i>
+                    <h3>100% Akurat</h3>
+                    <p>Perhitungan berdasarkan hukum Islam</p>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-bolt"></i>
+                    <h3>C++ di Browser</h3>
+                    <p>Program C++ asli berjalan via WebAssembly</p>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Aman & Terpercaya</h3>
+                    <p>Data tidak disimpan di server</p>
+                </div>
+            </div>
+            <button class="cta-btn" onclick="scrollToCalculator()">
+                <i class="fas fa-calculator"></i> Hitung Zakat Sekarang
+            </button>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2><i class="fas fa-sign-in-alt"></i> Masuk ke Sistem</h2>
+            
+            <div class="tab-container">
+                <button class="tab-btn active" onclick="openTab('login')">Masuk</button>
+                <button class="tab-btn" onclick="openTab('register')">Daftar</button>
+            </div>
+            
+            <!-- Login Form -->
+            <div id="login" class="tab-content active">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="loginUsername" placeholder="Username">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="loginPassword" placeholder="Password">
+                </div>
+                <button class="submit-btn" onclick="login()">
+                    <i class="fas fa-sign-in-alt"></i> Masuk
+                </button>
+            </div>
+            
+            <!-- Register Form -->
+            <div id="register" class="tab-content">
+                <div class="input-group">
+                    <i class="fas fa-user-plus"></i>
+                    <input type="text" id="regUsername" placeholder="Username baru">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="regPassword" placeholder="Password">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="regConfirmPassword" placeholder="Konfirmasi Password">
+                </div>
+                <button class="submit-btn" onclick="register()">
+                    <i class="fas fa-user-plus"></i> Daftar
+                </button>
+            </div>
+            
+            <div class="modal-footer">
+                <p>Admin: <code>AmilZakat</code> / <code>insyaAllahBarokah_2025</code></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Calculator Section -->
+    <section id="calculator" class="calculator-section">
+        <h2><i class="fas fa-calculator"></i> Kalkulator Zakat</h2>
+        <p class="section-subtitle">Pilih jenis zakat untuk menghitung kewajiban Anda</p>
+        
+        <!-- Jenis Zakat Selection -->
+        <div class="zakat-types">
+            <div class="zakat-card" onclick="selectZakatType('penghasilan')">
+                <i class="fas fa-money-bill-wave"></i>
+                <h4>Zakat Penghasilan</h4>
+                <p>Penghasilan bulanan/tahunan</p>
+            </div>
+            
+            <div class="zakat-card" onclick="selectZakatType('emas')">
+                <i class="fas fa-gem"></i>
+                <h4>Zakat Emas/Perak</h4>
+                <p>Perhiasan emas dan perak</p>
+            </div>
+            
+            <div class="zakat-card" onclick="selectZakatType('pertanian')">
+                <i class="fas fa-seedling"></i>
+                <h4>Zakat Pertanian</h4>
+                <p>Hasil panen pertanian</p>
+            </div>
+            
+            <div class="zakat-card" onclick="selectZakatType('ternak')">
+                <i class="fas fa-paw"></i>
+                <h4>Zakat Ternak</h4>
+                <p>Sapi, kambing, unta</p>
+            </div>
+            
+            <div class="zakat-card" onclick="selectZakatType('perdagangan')">
+                <i class="fas fa-store"></i>
+                <h4>Zakat Perdagangan</h4>
+                <p>Usaha dan perdagangan</p>
+            </div>
+            
+            <div class="zakat-card" onclick="selectZakatType('rikaz')">
+                <i class="fas fa-coins"></i>
+                <h4>Zakat Rikaz</h4>
+                <p>Barang temuan/harta karun</p>
+            </div>
+        </div>
+
+        <!-- Calculator Forms -->
+        <div class="calculator-forms">
+            <!-- Zakat Penghasilan Form -->
+            <div id="form-penghasilan" class="zakat-form active">
+                <h3><i class="fas fa-money-bill-wave"></i> Zakat Penghasilan</h3>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label><i class="fas fa-sack-dollar"></i> Gaji Bulanan (Rp)</label>
+                        <input type="number" id="gajiBulanan" placeholder="Contoh: 5000000">
+                    </div>
+                    <div class="input-group">
+                        <label><i class="fas fa-hand-holding-usd"></i> Kebutuhan Tahunan (Rp)</label>
+                        <input type="number" id="kebutuhanTahunan" placeholder="Biaya hidup setahun">
+                    </div>
+                    <div class="input-group">
+                        <label><i class="fas fa-credit-card"></i> Utang (Rp)</label>
+                        <input type="number" id="utangPenghasilan" placeholder="Total utang">
+                    </div>
+                    <div class="input-group">
+                        <label><i class="fas fa-file-invoice-dollar"></i> Piutang (Rp)</label>
+                        <input type="number" id="piutangPenghasilan" placeholder="Piutang yang bisa ditagih">
+                    </div>
+                </div>
+                <button class="calculate-btn" onclick="calculateZakatPenghasilan()">
+                    <i class="fas fa-calculator"></i> Hitung Zakat
+                </button>
+            </div>
+
+            <!-- Zakat Emas Form -->
+            <div id="form-emas" class="zakat-form">
+                <h3><i class="fas fa-gem"></i> Zakat Emas/Perak</h3>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Jenis Logam</label>
+                        <select id="jenisLogam">
+                            <option value="emas">Emas</option>
+                            <option value="perak">Perak</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Berat (gram)</label>
+                        <input type="number" id="beratLogam" placeholder="Contoh: 100" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label>Harga per Gram (Rp)</label>
+                        <input type="number" id="hargaPerGram" placeholder="Harga saat ini">
+                    </div>
+                </div>
+                <button class="calculate-btn" onclick="calculateZakatEmas()">
+                    <i class="fas fa-calculator"></i> Hitung Zakat
+                </button>
+            </div>
+
+            <!-- Zakat Ternak Form -->
+            <div id="form-ternak" class="zakat-form">
+                <h3><i class="fas fa-paw"></i> Zakat Ternak</h3>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Jenis Ternak</label>
+                        <select id="jenisTernak">
+                            <option value="sapi">Sapi</option>
+                            <option value="kambing">Kambing</option>
+                            <option value="unta">Unta</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Jumlah Ternak (ekor)</label>
+                        <input type="number" id="jumlahTernak" placeholder="Contoh: 30">
+                    </div>
+                </div>
+                <button class="calculate-btn" onclick="calculateZakatTernak()">
+                    <i class="fas fa-calculator"></i> Hitung Zakat
+                </button>
+            </div>
+
+            <!-- Zakat Pertanian Form -->
+            <div id="form-pertanian" class="zakat-form">
+                <h3><i class="fas fa-seedling"></i> Zakat Pertanian</h3>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Jenis Hasil Panen</label>
+                        <select id="jenisPanen">
+                            <option value="beras_putih">Beras Putih</option>
+                            <option value="padi_gagang">Padi Gagang</option>
+                            <option value="padi_kretek">Padi Kretek</option>
+                            <option value="kacang_hijau">Kacang Hijau</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Berat Hasil Panen (kg)</label>
+                        <input type="number" id="beratPanen" placeholder="Contoh: 1000">
+                    </div>
+                    <div class="input-group">
+                        <label>Irigasi Berbayar?</label>
+                        <select id="irigasiBayar">
+                            <option value="true">Ya</option>
+                            <option value="false">Tidak</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="calculate-btn" onclick="calculateZakatPertanian()">
+                    <i class="fas fa-calculator"></i> Hitung Zakat
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Display -->
+        <div class="results-section">
+            <h3><i class="fas fa-chart-bar"></i> Hasil Perhitungan</h3>
+            <div id="results" class="results-box">
+                <div class="loading" id="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Menghitung dengan C++...
+                </div>
+                <div id="resultContent"></div>
+            </div>
+            
+            <!-- WebAssembly Status -->
+            <div class="wasm-status">
+                <h4><i class="fas fa-microchip"></i> Status Engine C++</h4>
+                <div class="status-indicator">
+                    <span id="wasmStatus" class="status offline">
+                        <i class="fas fa-circle"></i> WebAssembly belum dimuat
+                    </span>
+                </div>
+                <button onclick="loadCppProgram()" class="btn-small">
+                    <i class="fas fa-sync"></i> Muat Ulang Engine
+                </button>
+                <p class="status-note">Program C++ asli berjalan di browser menggunakan WebAssembly</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <h2><i class="fas fa-star"></i> Fitur Lengkap</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-calculator"></i>
+                <h4>8 Jenis Zakat</h4>
+                <p>Penghasilan, emas, pertanian, ternak, perdagangan, properti, rikaz, dan tanaman</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-database"></i>
+                <h4>Database Nisab</h4>
+                <p>Nisab otomatis sesuai jenis zakat berdasarkan ketentuan Islam</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-user-shield"></i>
+                <h4>Manajemen User</h4>
+                <p>Login, registrasi, dan dashboard user</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-chart-line"></i>
+                <h4>Laporan Admin</h4>
+                <p>Monitoring saldo, distribusi zakat, laporan bulanan</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-file-export"></i>
+                <h4>Export Data</h4>
+                <p>Simpan hasil perhitungan dan laporan</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-mobile-alt"></i>
+                <h4>Responsive</h4>
+                <p>Akses dari desktop, tablet, atau smartphone</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="about-content">
+            <h2><i class="fas fa-info-circle"></i> Tentang Sistem Ini</h2>
+            <p>Sistem Amil Zakat ini adalah <strong>program C++ asli</strong> yang dikonversi ke WebAssembly sehingga bisa berjalan langsung di browser. Semua perhitungan dilakukan secara lokal di komputer Anda tanpa perlu server.</p>
+            
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <i class="fab fa-cuttlefish"></i>
+                    <span>C++ Program</span>
+                </div>
+                <div class="tech-item">
+                    <i class="fas fa-microchip"></i>
+                    <span>WebAssembly</span>
+                </div>
+                <div class="tech-item">
+                    <i class="fab fa-js"></i>
+                    <span>JavaScript</span>
+                </div>
+                <div class="tech-item">
+                    <i class="fab fa-html5"></i>
+                    <span>HTML5</span>
+                </div>
+                <div class="tech-item">
+                    <i class="fab fa-css3-alt"></i>
+                    <span>CSS3</span>
+                </div>
+                <div class="tech-item">
+                    <i class="fab fa-github"></i>
+                    <span>GitHub Pages</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4><i class="fas fa-mosque"></i> Amil Zakat</h4>
+                <p>Sistem perhitungan zakat digital berbasis C++ WebAssembly</p>
+                <p>© 2024 - azzahra207</p>
+            </div>
+            <div class="footer-section">
+                <h4><i class="fas fa-link"></i> Links</h4>
+                <a href="#home">Beranda</a>
+                <a href="#calculator">Kalkulator</a>
+                <a href="#features">Fitur</a>
+                <a href="#about">Tentang</a>
+            </div>
+            <div class="footer-section">
+                <h4><i class="fas fa-code"></i> Teknologi</h4>
+                <p>C++ 17</p>
+                <p>WebAssembly</p>
+                <p>Emscripten</p>
+                <p>GitHub Actions</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Program C++ berjalan di browser Anda <i class="fas fa-heart"></i></p>
+        </div>
+    </footer>
+
+    <!-- WebAssembly Loading Script -->
+    <script src="script.js"></script>
+    <script>
+        // Auto load WebAssembly saat halaman dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            loadCppProgram();
+            updateLoginButton();
+        });
+    </script>
+</body>
+</html>
