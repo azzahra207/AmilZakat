@@ -1,0 +1,50 @@
+name: Deploy C++ Zakat App
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+    
+    - name: Setup Emscripten
+      run: |
+        git clone https://github.com/emscripten-core/emsdk.git
+        cd emsdk
+        ./emsdk install latest
+        ./emsdk activate latest
+        echo "EMSDK_PATH=$(pwd)" >> $GITHUB_ENV
+    
+    - name: Compile C++ to WebAssembly
+      run: |
+        source $EMSDK_PATH/emsdk_env.sh
+        mkdir -p wasm
+        
+        # Compile program.cpp ke WebAssembly
+        emcc program.cpp -o wasm/program.js \
+          -s WASM=1 \
+          -s MODULARIZE=1 \
+          -s EXPORT_NAME='createModule' \
+          -s ALLOW_MEMORY_GROWTH=1 \
+          -s EXPORTED_FUNCTIONS='["_main", "_loginUser", "_calculateZakat"]' \
+          -s EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "UTF8ToString"]' \
+          -s ENVIRONMENT='web' \
+          -s SINGLE_FILE=0 \
+          -O3
+        
+        echo "✅ WebAssembly compilation successful!"
+        ls -la wasm/
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: .
+        publish_branch: gh-pages
+        keep_files: true
