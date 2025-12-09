@@ -1,24 +1,29 @@
-# Amil Zakat - Kalkulator Zakat C++ WebAssembly
+# Amil Zakat - Program C++ di Browser
 
-Sistem perhitungan zakat digital berbasis C++ yang berjalan di browser menggunakan WebAssembly.
+Program sistem zakat lengkap berbasis C++ yang berjalan di browser menggunakan WebAssembly.
 
-## 🌐 Live Demo
+## 🌐 Demo
 [https://azzahra207.github.io/AmilZakat/](https://azzahra207.github.io/AmilZakat/)
 
-## ✨ Fitur Utama
-- ✅ 8 jenis zakat lengkap
-- ✅ Program C++ asli berjalan di browser
-- ✅ Perhitungan otomatis berdasarkan nisab
-- ✅ Sistem login/register
-- ✅ Dashboard admin dan user
-- ✅ Responsive design
+## 📋 Fitur Program
+- Sistem login/register pengguna
+- Kalkulator 8 jenis zakat
+- Dashboard admin dan user
+- Manajemen mustahik
+- Laporan keuangan
+- Sistem transaksi zakat
 
-## 🛠️ Teknologi
-- **C++ 17** - Logika utama program
+## 🔧 Teknologi
+- **C++** - Program utama
 - **WebAssembly** - Menjalankan C++ di browser
 - **Emscripten** - Compiler C++ ke WASM
-- **HTML5/CSS3/JavaScript** - Frontend
-- **GitHub Pages** - Hosting gratis
-- **GitHub Actions** - Auto-deploy
+- **HTML/JavaScript** - Interface web
 
-## 📁 Struktur File
+## 🚀 Cara Menggunakan di Web
+1. Buka website di browser
+2. Program akan berjalan otomatis seperti terminal
+3. Login dengan:
+   - **Admin**: `AmilZakat` / `insyaAllahBarokah_2025`
+   - **User biasa**: Register baru
+
+## 📁 Struktur
