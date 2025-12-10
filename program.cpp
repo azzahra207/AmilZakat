@@ -121,7 +121,7 @@ struct penghasilan{
     string pekerjaan;
     long long modal;
     long long gajiBulanan;
-    long long piutang; // yang kira-kira bisa ditagih
+    long long piutang; 
     long long utang;
     long long kebutuhan;
     bool wajibZakat;
@@ -130,15 +130,15 @@ struct perhiasan{
     int id;
     int id_user;
     string nama;
-    float berat; // gr
-    long long hargaPerGram; // gr
+    float berat;
+    long long hargaPerGram; 
     bool wajibZakat;
 };
 struct tani{
     int id;
     int id_user;
     string nama;
-    float berat; // kg
+    float berat; 
     bool bayarIrigasi;
     bool wajibZakat;
 };
@@ -182,15 +182,15 @@ struct transaksi {
     string jenis_zakat;
     long long jumlah;
     string tanggal;
-    string status; // "pending", "verified", "distributed"
-    int id_penerima; // 0 = belum didistribusi
+    string status; 
+    int id_penerima;
     string keterangan;
 };
 
 struct mustahik {
     int id;
     string nama;
-    string kategori; // fakir, miskin, amil, muallaf, riqab, gharimin, fisabilillah, ibnu sabil
+    string kategori; 
     string alamat;
     string telepon;
     string keterangan;
@@ -262,6 +262,17 @@ float cariNisabFloat(string nama, int i = 0) {
     return cariNisabFloat(nama, i+1);
 }
 
+string cariHaul(string nama, int i=0){
+    dataNisab datanisab;
+    if(i>=15){
+        return 0;
+    }
+    else if(datanisab.nama[i]==nama){
+        return (string)datanisab.haul[i];
+    } else{
+        return cariHaul(nama,i+1);
+    }
+}
 float cariZakatFloat(string nama, int i=0){
     dataNisab datanisab;
     if(i>=15){
@@ -514,17 +525,33 @@ string padLeft(string text, int width) {
     }
     return string(width - textLen, ' ') + text;
 }
+void loadTransaksiFromFile() {
+    ifstream file("transaksi.txt");
+    if(file.is_open()) {
+        jumlahTransaksi = 0;
+        string baris;
+        transaksi t;
+        string status;
+        while(file >> t.id >> t.id_pembayar >> t.jenis_zakat >> t.jumlah 
+              >> t.tanggal >> status >> t.id_penerima) {
+            getline(file, t.keterangan);
+            t.status = status;
+            dataTransaksi[jumlahTransaksi++] = t;
+        }
+        file.close();
+    }
+}
 void riwayatPembayaranZakat(pengguna &user) {
     system("cls");
     cout << "=== RIWAYAT PEMBAYARAN ZAKAT " << user.username << " ===\n\n";
     
     bool adaRiwayat = false;
     int count = 0;
-    loadTransaksiFromFile();
+
     cout << "+-----+------------+----------------------+----------------+------------+\n";
     cout << "| No  | Tanggal    | Jenis Zakat          | Jumlah         | Status     |\n";
     cout << "+-----+------------+----------------------+----------------+------------+\n";
-    
+    loadTransaksiFromFile();
     for(int i = 0; i < jumlahTransaksi; i++) {
         if(dataTransaksi[i].id_pembayar == user.id) {
             adaRiwayat = true;
@@ -547,7 +574,6 @@ void riwayatPembayaranZakat(pengguna &user) {
     
     cout << "+-----+------------+----------------------+----------------+------------+\n\n";
     
-    // Hitung total
     long long totalDibayar = 0;
     for(int i = 0; i < jumlahTransaksi; i++) {
         if(dataTransaksi[i].id_pembayar == user.id && 
@@ -744,25 +770,10 @@ void panduanZakat() {
     } while(pilihan != 6);
 }
 
-void loadTransaksiFromFile() {
-    ifstream file("transaksi.txt");
-    if(file.is_open()) {
-        jumlahTransaksi = 0;
-        string baris;
-        transaksi t;
-        string status;
-        while(file >> t.id >> t.id_pembayar >> t.jenis_zakat >> t.jumlah 
-              >> t.tanggal >> status >> t.id_penerima) {
-            getline(file, t.keterangan);
-            t.status = status;
-            dataTransaksi[jumlahTransaksi++] = t;
-        }
-        file.close();
-    }
-}
+
 
 void saveTransaksiToFile() {
-    ofstream file("transaksi.txt");
+    ofstream file("transaksi.txt", ios::app);
     for(int i = 0; i < jumlahTransaksi; i++) {
         file << dataTransaksi[i].id << " "
              << dataTransaksi[i].id_pembayar << " "
@@ -791,7 +802,7 @@ void loadMustahikFromFile() {
 }
 
 void saveMustahikToFile() {
-    ofstream file("mustahik.txt");
+    ofstream file("mustahik.txt",ios::app);
     for(int i = 0; i < jumlahMustahik; i++) {
         file << dataMustahik[i].id << " "
              << dataMustahik[i].nama << " "
@@ -977,7 +988,6 @@ void monitoringSaldoKasZakat() {
     
     updateSaldo();
     
-    // Buat garis atas
     cout << "+----------------------------------------------+\n";
     cout << "|            LAPORAN KEUANGAN ZAKAT            |\n";
     cout << "+----------------------------------------------+\n";
@@ -986,7 +996,6 @@ void monitoringSaldoKasZakat() {
     cout << "| Saldo Akhir          : " << padRight(Rupiah(saldoZakat.saldo_akhir), 25) << " |\n";
     cout << "+----------------------------------------------+\n\n";
     
-    // Detail transaksi terakhir
     cout << "10 TRANSAKSI TERAKHIR:\n";
     cout << "======================\n";
     
@@ -1014,7 +1023,6 @@ void tampilkanDataMustahik(){
                 if(jumlahMustahik == 0) {
                     cout << "Belum ada data mustahik.\n";
                 } else {
-                    // Header tabel
                     cout << "+-----+--------------------+--------------------+--------------------+--------------------+\n";
                     cout << "| ID  | Nama               | Kategori           | Total Diterima     | Tanggal Terakhir   |\n";
                     cout << "+-----+--------------------+--------------------+--------------------+--------------------+\n";
@@ -1058,7 +1066,7 @@ void tampilkanDataMustahik(){
         cin >> pilihan;
         
         switch(pilihan) {
-            case 1: { // Tambah Mustahik
+            case 1: {
                 mustahik baru;
                 cout << "\n=== TAMBAH MUSTAHIK ===\n";
                 cout << "Nama: ";
@@ -1089,7 +1097,7 @@ void tampilkanDataMustahik(){
                 break;
             }
             
-            case 2: { // Tampilkan Semua Mustahik
+            case 2: {
                 tampilkanDataMustahik();
                 cout << "\nTekan Enter untuk kembali...";
                 cin.ignore();
@@ -1582,8 +1590,7 @@ void bayarZakat(pengguna &user){
     if(user.password == pass){
         if(user.saldo<bayar){
             cout << "\nSaldo tidak mencukupi untuk membayar zakat!\n";
-            cout << "Kekurangan: " << Rupiah(bayar - user.saldo) << endl;
-            system("pause");
+            cout << "Kurang: " << Rupiah(bayar - user.saldo) << endl;
             return;
         } else {
         user.saldo -= bayar;
@@ -1657,13 +1664,13 @@ void inputData(pengguna &user){
     int pilihan = menuJenisZakat();
     
     switch(pilihan){
-        case 1: { // Zakat Penghasilan
+        case 1: { 
             penghasilan data;
             data.id_user = user.id;
             
             cout << "\n=== INPUT DATA PENGHASILAN ==="<<endl;
             cout << "Pekerjaan: ";
-            cin.ignore();  // PERBAIKAN: tambah cin.ignore()
+            cin.ignore();  
             getline(cin, data.pekerjaan);
             cout << "Modal usaha (Rp): ";
             cin >> data.modal;
@@ -1676,10 +1683,8 @@ void inputData(pengguna &user){
             cout << "Kebutuhan pokok per tahun (Rp): ";
             cin >> data.kebutuhan;
             
-            // Hitung zakat
             long long zakat = zakatPenghasilan(data);
             
-            // Simpan ke file
             ofstream file("penghasilan.txt", ios::app);
             if(file.is_open()){
                 file << autoIncrement("penghasilan.txt") << " "
@@ -1697,25 +1702,21 @@ void inputData(pengguna &user){
                 cout << "Gagal menyimpan data!\n";
             }
             
-            // Tampilkan hasil
             cout << "\n=== HASIL PERHITUNGAN ==="<<endl;
             cout << "Status: " << (data.wajibZakat ? "WAJIB ZAKAT" : "Tidak Wajib Zakat") << endl;
             if(data.wajibZakat){
-                cout << "Zakat yang harus dibayar: " << Rupiah(zakat) << endl;
+                cout << "Zakat yang harus dibayar: " << Rupiah(zakat) << " " <<cariHaul("perusahaan") << endl;
                 char bayarNow;
                 cout << "Bayar Sekarang (Y/T)?";
                 cin >> bayarNow;
                 if(bayarNow=='Y' || bayarNow=='y'){
                     bayarZakat(user);
-                    // saldo user dikurangi var zakat
-                    // saldo admin ditambah var zakat
-                    // 
                 }
             }
             break;
         }
         
-        case 2: { // Zakat Perhiasan - PERBAIKAN: Hapus do-while yang salah
+        case 2: { 
             perhiasan data;
             data.id_user = user.id;
             
@@ -1727,7 +1728,6 @@ void inputData(pengguna &user){
             int namaPerhiasan;
             cin >> namaPerhiasan;
             
-            // PERBAIKAN: Gunakan if-else, bukan do-while switch
             if(namaPerhiasan == 1){
                 data.nama = "emas";
             } else if(namaPerhiasan == 2){
@@ -1743,10 +1743,8 @@ void inputData(pengguna &user){
             cout << "Harga per Gram (Rp): ";
             cin >> data.hargaPerGram;
             
-            // Hitung zakat
             long long zakat = zakatPerhiasan(data);
             
-            // Simpan ke file
             ofstream file("perhiasan.txt", ios::app);
             if(file.is_open()){
                 file << autoIncrement("perhiasan.txt") << " "
@@ -1761,16 +1759,21 @@ void inputData(pengguna &user){
                 cout << "Gagal menyimpan data!\n";
             }
             
-            // Tampilkan hasil
             cout << "\n=== HASIL PERHITUNGAN ==="<<endl;
             cout << "Status: " << (data.wajibZakat ? "WAJIB ZAKAT" : "Tidak Wajib Zakat") << endl;
             if(data.wajibZakat){
                 cout << "Zakat yang harus dibayar: " << Rupiah(zakat) << endl;
+                char bayarNow;
+                cout << "Bayar Sekarang (Y/T)?";
+                cin >> bayarNow;
+                if(bayarNow=='Y' || bayarNow=='y'){
+                    bayarZakat(user);
+                }
             }
             break;
         }
         
-        case 3: { // Zakat Pertanian - PERBAIKAN: Hapus do-while yang salah
+        case 3: { 
             tani data;
             data.id_user = user.id;
             
@@ -1808,10 +1811,8 @@ void inputData(pengguna &user){
             cin >> bayar;
             data.bayarIrigasi = (bayar == 'Y' || bayar == 'y');
             
-            // Hitung zakat
             float zakat = zakatPertanian(data);
             
-            // Simpan ke file
             ofstream file("pertanian.txt", ios::app);
             if(file.is_open()){
                 file << autoIncrement("pertanian.txt") << " "
@@ -1826,7 +1827,6 @@ void inputData(pengguna &user){
                 cout << "Gagal menyimpan data!\n";
             }
             
-            // Tampilkan hasil
             cout << "\n=== HASIL PERHITUNGAN ==="<<endl;
             cout << "Status: " << (data.wajibZakat ? "WAJIB ZAKAT" : "Tidak Wajib Zakat") << endl;
             if(data.wajibZakat){
@@ -1835,7 +1835,7 @@ void inputData(pengguna &user){
             break;
         }
         
-        case 4: { // Zakat Tanaman/Perikanan
+        case 4: { 
             tanaman data;
             data.id_user = user.id;
             
@@ -1868,16 +1868,21 @@ void inputData(pengguna &user){
                 cout << "Gagal menyimpan data!\n";
             }
             
-            // Tampilkan hasil
             cout << "\n=== HASIL PERHITUNGAN ==="<<endl;
             cout << "Status: " << (data.wajibZakat ? "WAJIB ZAKAT" : "Tidak Wajib Zakat") << endl;
             if(data.wajibZakat){
                 cout << "Zakat yang harus dibayar: " << Rupiah(zakat) << endl;
+                char bayarNow;
+                cout << "Bayar Sekarang (Y/T)?";
+                cin >> bayarNow;
+                if(bayarNow=='Y' || bayarNow=='y'){
+                    bayarZakat(user);
+                }
             }
             break;
         }
         
-        case 5: { // Zakat Properti
+        case 5: { 
             properti data;
             data.id_user = user.id;
             
@@ -1895,10 +1900,8 @@ void inputData(pengguna &user){
             cout << "Utang yang belum dibayar (Rp): ";
             cin >> data.utang;
             
-            // Hitung zakat
             long long zakat = zakatProperti(data);
             
-            // Simpan ke file
             ofstream file("properti.txt", ios::app);
             if(file.is_open()){
                 file << autoIncrement("properti.txt") << " "
@@ -1916,53 +1919,61 @@ void inputData(pengguna &user){
                 cout << "Gagal menyimpan data!\n";
             }
             
-            // Tampilkan hasil
             cout << "\n=== HASIL PERHITUNGAN ==="<<endl;
             cout << "Status: " << (data.wajibZakat ? "WAJIB ZAKAT" : "Tidak Wajib Zakat") << endl;
             if(data.wajibZakat){
                 cout << "Zakat yang harus dibayar: " << Rupiah(zakat) << endl;
+                char bayarNow;
+                cout << "Bayar Sekarang (Y/T)?";
+                cin >> bayarNow;
+                if(bayarNow=='Y' || bayarNow=='y'){
+                    bayarZakat(user);
+                }
             }
             break;
         }
         
-        case 6: { // Zakat Rikaz
+        case 6: { 
             rikaz data;
             data.id_user = user.id;
             
             cout << "\n=== INPUT HARTA TEMUAN (RIKAZ) ==="<<endl;
             cout << "Nama Barang: ";
-            cin.ignore();  // PERBAIKAN: tambah cin.ignore()
+            cin.ignore();
             getline(cin, data.barang);
             cout << "Harga Barang (Rp): ";
             cin >> data.hargaBarang;
             
-            // Hitung zakat
             long long zakat = zakatRikaz(data);
             
-            // Simpan ke file
             ofstream file("rikaz.txt", ios::app);
             if(file.is_open()){
                 file << autoIncrement("rikaz.txt") << " "
                      << data.id_user << " "
                      << data.barang << " "
                      << data.hargaBarang << " "
-                     << "0" << endl; // Rikaz selalu wajib zakat jika ada barang
+                     << "0" << endl;
                 file.close();
                 cout << "Data berhasil disimpan!\n";
             } else {
                 cout << "Gagal menyimpan data!\n";
             }
             
-            // Tampilkan hasil
             cout << "\n=== HASIL PERHITUNGAN ==="<<endl;
             cout << "Status: " << (data.hargaBarang > 0 ? "WAJIB ZAKAT" : "Tidak Wajib Zakat") << endl;
             if(data.hargaBarang > 0){
                 cout << "Zakat yang harus dibayar: " << Rupiah(zakat) << endl;
+                char bayarNow;
+                cout << "Bayar Sekarang (Y/T)?";
+                cin >> bayarNow;
+                if(bayarNow=='Y' || bayarNow=='y'){
+                    bayarZakat(user);
+                }
             }
             break;
         }
         
-        case 7: { // Zakat Ternak
+        case 7: { 
             ternak data;
             data.id_user = user.id;
             
@@ -1973,10 +1984,8 @@ void inputData(pengguna &user){
             cout << "Jumlah ternak (ekor): ";
             cin >> data.jumlah;
             
-            // Hitung zakat
             string hasilZakat = zakatTernak(data);
             
-            // Simpan ke file
             ofstream file("ternak.txt", ios::app);
             if(file.is_open()){
                 file << autoIncrement("ternak.txt") << " "
@@ -1990,14 +1999,13 @@ void inputData(pengguna &user){
                 cout << "Gagal menyimpan data!\n";
             }
             
-            // Tampilkan hasil
             cout << "\n=== HASIL PERHITUNGAN ==="<<endl;
             cout << "Status: " << (data.wajibZakat ? "WAJIB ZAKAT" : "Tidak Wajib Zakat") << endl;
             cout << "Keterangan: " << hasilZakat << endl;
             break;
         }
         
-        case 8: // Kembali
+        case 8: 
             return;
             
         default:
@@ -2141,10 +2149,25 @@ int main(){
         }       
     } else{
         cout <<"--- Registrasi Akun ---"<< endl;
-        cout << "Username: ";
+        cout << "Username (tidak boleh ada spasi): ";
         cin >> pengguna.username;
-        cout << "Password: ";
+        while(true){
+        cout << "Password (minimal 8 karakter): ";
         cin >> pengguna.password;
+        string confirmPass;
+        cout << "Konfirmasi password: "<<endl;
+        cin >> confirmPass;
+        if(pengguna.password.length()<8){
+            if(pengguna.password!=confirmPass){
+            cout << "Konfirmasi Password tidak sesuai"<<endl;
+        }
+            cout << "Minimal 8 karakter"<<endl;
+        } else if(pengguna.password!=confirmPass){
+            cout << "Konfirmasi Password tidak sesuai"<<endl;
+        } else{
+            break;
+        }
+        };
         ifstream bacaUser3;
         bool isUnique=true;
         bacaUser3.open("users.txt");
@@ -2158,6 +2181,7 @@ int main(){
         if(isUnique){
             pengguna.id=autoIncrement("users.txt");
             ofstream appendUser1;
+            pengguna.saldo=0;
             appendUser1.open("users.txt", ios::app);
             appendUser1 << pengguna.id << " " << pengguna.username << " " << pengguna.password << " " << pengguna.saldo << "\n";
             appendUser1.close();
