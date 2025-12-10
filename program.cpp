@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <ctime>
 using namespace std;
 
 struct pengguna{
@@ -243,38 +244,34 @@ int autoIncrement(string nameFile){
     return hasilId;
 }
 
-long long cariNisabLong(string nama){
+long long cariNisabLong(string nama, int i=0){
     dataNisab datanisab;
-    long long nisab;
-    for(int i=0;i<15;i++){
-        if(datanisab.nama[i]==nama){
-            nisab=(long long)datanisab.nisab[i];
-            break;
-        }
-    }
-    return nisab;
+    if(i>=15)
+        return 0LL;
+    else
+    return (datanisab.nama[i]!=nama) ? cariNisabLong(nama,i+1) : (long long)datanisab.nisab[i];
 }
-float cariNisabFloat(string nama){
+float cariNisabFloat(string nama, int i = 0) {
     dataNisab datanisab;
-    float nisab;
-    for(int i=0;i<15;i++){
-        if(datanisab.nama[i]==nama){
-            nisab=datanisab.nisab[i];
-            break;
-        }
+    if(i >= 15){
+        return 0;
     }
-    return nisab;
+    if(datanisab.nama[i] == nama){
+        return datanisab.nisab[i];
+    } 
+    return cariNisabFloat(nama, i+1);
 }
-float cariZakatFloat(string nama){
+
+float cariZakatFloat(string nama, int i=0){
     dataNisab datanisab;
-    float wajibZakat;
-    for(int i=0;i<15;i++){
-        if(datanisab.nama[i]==nama){
-            wajibZakat=datanisab.wajibZakat[i];
-            break;
-        }
+    if(i>=15){
+        return 0;
     }
-    return wajibZakat/100;
+    else if(datanisab.nama[i]==nama){
+        return datanisab.wajibZakat[i]/100;
+    } else{
+        return cariZakatFloat(nama,i+1);
+    }
 }
 long long zakatPenghasilan(penghasilan &row){
     long long nisab = cariNisabLong("perusahaan")*1000;
@@ -500,62 +497,258 @@ string zakatTernak(ternak &row){
         row.wajibZakat=false;
         return "Tidak Wajib Membayar Zakat";
     }
-};
+}
+string padRight(string text, int width) {
+    int textLen = (int)text.length();
+    if(textLen >= width) {
+        return text.substr(0, width);
+    }
 
-string padString(string str, int length) {
-    if(str.length() > length) {
-        return str.substr(0, length - 3) + "...";
-    }
-    
-    string result = str;
-    for(int i = str.length(); i < length; i++) {
-        result += " ";
-    }
-    return result;
+    return text + string(width - textLen, ' ');
 }
 
-string padNumber(long long num, int length) {
-    string str = to_string(num);
-    if(str.length() > length) {
-        return str.substr(0, length - 3) + "...";
+string padLeft(string text, int width) {
+    int textLen = (int)text.length();
+    if(textLen >= width) {
+        return text.substr(0, width);
     }
-    
-    string result = str;
-    for(int i = str.length(); i < length; i++) {
-        result = " " + result;
-    }
-    return result;
+    return string(width - textLen, ' ') + text;
 }
-
-string padRight(string str, int length) {
-    if(str.length() >= length) {
-        return str.substr(0, length);
+void riwayatPembayaranZakat(pengguna &user) {
+    system("cls");
+    cout << "=== RIWAYAT PEMBAYARAN ZAKAT " << user.username << " ===\n\n";
+    
+    bool adaRiwayat = false;
+    int count = 0;
+    loadTransaksiFromFile();
+    cout << "+-----+------------+----------------------+----------------+------------+\n";
+    cout << "| No  | Tanggal    | Jenis Zakat          | Jumlah         | Status     |\n";
+    cout << "+-----+------------+----------------------+----------------+------------+\n";
+    
+    for(int i = 0; i < jumlahTransaksi; i++) {
+        if(dataTransaksi[i].id_pembayar == user.id) {
+            adaRiwayat = true;
+            count++;
+            
+            string jenis = dataTransaksi[i].jenis_zakat;
+            if(jenis.length() > 20) jenis = jenis.substr(0, 17) + "...";
+            
+            cout << "| " << padLeft(to_string(count), 3) << " "
+                 << "| " << padRight(dataTransaksi[i].tanggal, 10)
+                 << " | " << padRight(jenis, 20)
+                 << " | " << padRight(Rupiah(dataTransaksi[i].jumlah), 14)
+                 << " | " << padRight(dataTransaksi[i].status, 10) << " |\n";
+        }
     }
     
-    string result = str;
-    for(int i = str.length(); i < length; i++) {
-        result += " ";
+    if(!adaRiwayat) {
+        cout << "|                      BELUM ADA RIWAYAT PEMBAYARAN                    |\n";
     }
-    return result;
+    
+    cout << "+-----+------------+----------------------+----------------+------------+\n\n";
+    
+    // Hitung total
+    long long totalDibayar = 0;
+    for(int i = 0; i < jumlahTransaksi; i++) {
+        if(dataTransaksi[i].id_pembayar == user.id && 
+           dataTransaksi[i].status == "verified") {
+            totalDibayar += dataTransaksi[i].jumlah;
+        }
+    }
+    
+    cout << "Total zakat yang telah dibayarkan: " << Rupiah(totalDibayar) << endl;
+    
+    cout << "\nTekan Enter untuk kembali...";
+    cin.ignore();
+    cin.get();
 }
-
-string padLeft(string str, int length) {
-    if(str.length() >= length) {
-        return str.substr(0, length);
-    }
+void panduanZakat() {
+    system("cls");
+    int pilihan;
     
-    string result = "";
-    for(int i = str.length(); i < length; i++) {
-        result += " ";
-    }
-    result += str;
-    return result;
+    do {
+        system("cls");
+        cout << "=== PANDUAN ZAKAT ===\n\n";
+        cout << "1. Syarat-Syarat Wajib Zakat\n";
+        cout << "2. Jenis-Jenis Zakat\n";
+        cout << "3. Nisab Zakat\n";
+        cout << "4. Cara Menghitung Zakat\n";
+        cout << "5. 8 Golongan Mustahik\n";
+        cout << "6. Kembali\n";
+        cout << "Pilihan: ";
+        cin >> pilihan;
+        
+        switch(pilihan) {
+            case 1: {
+                system("cls");
+                cout << "=== SYARAT-SYARAT WAJIB ZAKAT ===\n\n";
+                cout << "1. Islam\n";
+                cout << "2. Merdeka (bukan budak)\n";
+                cout << "3. Berakal dan baligh\n";
+                cout << "4. Memiliki harta yang mencapai nisab\n";
+                cout << "5. Harta dimiliki secara sempurna\n";
+                cout << "6. Telah mencapai haul (1 tahun)\n";
+                cout << "7. Kebutuhan pokok telah terpenuhi\n";
+                cout << "8. Bebas dari hutang\n\n";
+                cout << "Keterangan:\n";
+                cout << "- Nisab: batas minimum harta yang wajib dizakati\n";
+                cout << "- Haul: kepemilikan harta selama 1 tahun hijriyah\n";
+                system("pause");
+                break;
+            }
+            
+            case 2: {
+                system("cls");
+                cout << "=== JENIS-JENIS ZAKAT ===\n\n";
+                cout << "1. ZAKAT FITRAH\n";
+                cout << "   - Dibayar di bulan Ramadhan\n";
+                cout << "   - Sebesar 2.5 kg beras/gandum atau senilai\n";
+                cout << "   - Wajib bagi setiap muslim\n\n";
+                
+                cout << "2. ZAKAT MAL (HARTA)\n";
+                cout << "   a. Zakat Emas/Perak\n";
+                cout << "      - Nisab emas: 85 gram\n";
+                cout << "      - Nisab perak: 595 gram\n";
+                cout << "      - Kadar: 2.5%\n\n";
+                
+                cout << "   b. Zakat Uang/Investasi\n";
+                cout << "      - Nisab: senilai 85 gram emas\n";
+                cout << "      - Kadar: 2.5%\n\n";
+                
+                cout << "   c. Zakat Pertanian\n";
+                cout << "      - Nisab: 5 wasq (653 kg)\n";
+                cout << "      - Kadar: 5% (irigasi berbayar) atau 10% (tadah hujan)\n\n";
+                
+                cout << "   d. Zakat Ternak\n";
+                cout << "      - Sapi/kerbau: nisab 30 ekor\n";
+                cout << "      - Kambing/domba: nisab 40 ekor\n";
+                cout << "      - Unta: nisab 5 ekor\n\n";
+                
+                cout << "   e. Zakat Profesi\n";
+                cout << "      - Nisab: senilai 85 gram emas per tahun\n";
+                cout << "      - Kadar: 2.5% dari penghasilan bersih\n";
+                system("pause");
+                break;
+            }
+            
+            case 3: {
+                system("cls");
+                cout << "=== NISAB ZAKAT ===\n\n";
+
+                dataNisab nisab;
+                cout << "+----+----------------------------+----------------+----------+\n";
+                cout << "| No | Jenis Harta                | Nisab          | Satuan   |\n";
+                cout << "+----+----------------------------+----------------+----------+\n";
+
+                for(int i = 0; i < 15; i++) {
+                    string jenis = nisab.nama[i];
+                    if(jenis.length() > 25) jenis = jenis.substr(0, 22) + "...";
+                    string strNisab;
+                    if(nisab.nisab[i] == (long long)nisab.nisab[i]) {
+                        strNisab = to_string((long long)nisab.nisab[i]);
+                    } else {
+                        strNisab = to_string(nisab.nisab[i]);
+                        if(strNisab.length() > 10) {
+                            strNisab = strNisab.substr(0, 10);
+                        }
+                    }
+
+                    cout << "| " << padLeft(to_string(i+1), 2) << " "
+                         << "| " << padRight(jenis, 26)
+                         << "| " << padRight(strNisab, 14)
+                         << "| " << padRight(nisab.satuan[i], 8) << " |\n";
+                }
+                cout << "+----+----------------------------+----------------+----------+\n\n";
+
+                cout << "Keterangan:\n";
+                cout << "- Nisab dalam satuan yang tertera\n";
+                cout << "- Untuk zakat uang, nisab = senilai 85 gram emas\n";
+                system("pause");
+                break;
+            }
+            
+            case 4: {
+                system("cls");
+                cout << "=== CARA MENGHITUNG ZAKAT ===\n\n";
+                cout << "RUMUS UMUM:\n";
+                cout << "Zakat = 2.5% x (Harta - Hutang - Kebutuhan Pokok)\n\n";
+                
+                cout << "CONTOH PERHITUNGAN:\n\n";
+                cout << "1. Zakat Emas:\n";
+                cout << "   - Emas yang dimiliki: 100 gram\n";
+                cout << "   - Harga emas/gram: Rp 1.000.000\n";
+                cout << "   - Total nilai: 100 x 1.000.000 = Rp 100.000.000\n";
+                cout << "   - Zakat: 2.5% x Rp 100.000.000 = Rp 2.500.000\n\n";
+                
+                cout << "2. Zakat Penghasilan:\n";
+                cout << "   - Gaji bulanan: Rp 10.000.000\n";
+                cout << "   - Penghasilan setahun: 12 x 10.000.000 = Rp 120.000.000\n";
+                cout << "   - Kebutuhan pokok setahun: Rp 60.000.000\n";
+                cout << "   - Penghasilan bersih: 120.000.000 - 60.000.000 = Rp 60.000.000\n";
+                cout << "   - Zakat: 2.5% x 60.000.000 = Rp 1.500.000\n\n";
+                
+                cout << "3. Zakat Pertanian:\n";
+                cout << "   - Hasil panen: 1000 kg beras\n";
+                cout << "   - Irigasi berbayar: ya\n";
+                cout << "   - Zakat: 5% x 1000 kg = 50 kg beras\n";
+                system("pause");
+                break;
+            }
+            
+            case 5: {
+                system("cls");
+                cout << "=== 8 GOLONGAN MUSTAHIK (PENERIMA ZAKAT) ===\n\n";
+                cout << "1. FAKIR\n";
+                cout << "   - Orang yang tidak memiliki harta dan pekerjaan\n";
+                cout << "   - Tidak mampu memenuhi kebutuhan pokok\n\n";
+                
+                cout << "2. MISKIN\n";
+                cout << "   - Memiliki harta/pekerjaan tapi tidak mencukupi\n";
+                cout << "   - Penghasilan di bawah standar minimum\n\n";
+                
+                cout << "3. AMIL\n";
+                cout << "   - Pengelola zakat (panitia, admin, dll)\n";
+                cout << "   - Mendapat bagian dari zakat sebagai upah\n\n";
+                
+                cout << "4. MUALLAF\n";
+                cout << "   - Orang yang baru masuk Islam\n";
+                cout << "   - Diberi zakat untuk menguatkan iman\n\n";
+                
+                cout << "5. RIQAAB (HAMBASAHAYA)\n";
+                cout << "   - Budak yang ingin memerdekakan diri\n";
+                cout << "   - Di masa sekarang: membantu pekerja terikat\n\n";
+                
+                cout << "6. GHARIMIN\n";
+                cout << "   - Orang yang berhutang untuk kebutuhan halal\n";
+                cout << "   - Tidak mampu melunasi hutangnya\n\n";
+                
+                cout << "7. FISABILILLAH\n";
+                cout << "   - Orang yang berjuang di jalan Allah\n";
+                cout << "   - Aktivis dakwah, pendidikan Islam, dll\n\n";
+                
+                cout << "8. IBNU SABIL\n";
+                cout << "   - Musafir yang kehabisan bekal\n";
+                cout << "   - Pelajar/mahasiswa rantau yang kesulitan\n";
+                system("pause");
+                break;
+            }
+            
+            case 6:
+                return;
+                
+            default:
+                cout << "Pilihan tidak valid!\n";
+                system("pause");
+                break;
+        }
+    } while(pilihan != 6);
 }
 
 void loadTransaksiFromFile() {
     ifstream file("transaksi.txt");
     if(file.is_open()) {
         jumlahTransaksi = 0;
+        string baris;
         transaksi t;
         string status;
         while(file >> t.id >> t.id_pembayar >> t.jenis_zakat >> t.jumlah 
@@ -628,124 +821,70 @@ void updateSaldo() {
 }
 
 string getCurrentDate() {
-    return "2024-01-15";
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+    
+    char frmDate[11];
+    strftime(frmDate, sizeof(frmDate), "%Y-%m-%d", ltm);
+    
+    return string(frmDate);
 }
 
 // ==================== FUNGSI MENU ADMIN ====================
-void verifikasiPembayaranZakat() {
-    system("cls");
-    cout << "=== VERIFIKASI PEMBAYARAN ZAKAT ===\n\n";
-    
-    // Tampilkan transaksi pending
-    bool adaPending = false;
-    cout << "TRANSAKSI MENUNGGU VERIFIKASI:\n";
-    cout << "===============================\n";
-    
-    for(int i = 0; i < jumlahTransaksi; i++) {
-        if(dataTransaksi[i].status == "pending") {
-            adaPending = true;
-            cout << "ID Transaksi: " << dataTransaksi[i].id << endl;
-            cout << "Pembayar ID: " << dataTransaksi[i].id_pembayar << endl;
-            cout << "Jenis Zakat: " << dataTransaksi[i].jenis_zakat << endl;
-            cout << "Jumlah: " << Rupiah(dataTransaksi[i].jumlah) << endl;
-            cout << "Tanggal: " << dataTransaksi[i].tanggal << endl;
-            cout << "---------------------------\n";
-        }
-    }
-    
-    if(!adaPending) {
-        cout << "Tidak ada transaksi yang perlu diverifikasi.\n";
-        system("pause");
-        return;
-    }
-    
-    int idTransaksi;
-    cout << "\nMasukkan ID Transaksi untuk diverifikasi: ";
-    cin >> idTransaksi;
-    
-    for(int i = 0; i < jumlahTransaksi; i++) {
-        if(dataTransaksi[i].id == idTransaksi && dataTransaksi[i].status == "pending") {
-            cout << "\nDetail Transaksi:\n";
-            cout << "ID: " << dataTransaksi[i].id << endl;
-            cout << "Pembayar: " << dataTransaksi[i].id_pembayar << endl;
-            cout << "Jenis: " << dataTransaksi[i].jenis_zakat << endl;
-            cout << "Jumlah: " << Rupiah(dataTransaksi[i].jumlah) << endl;
-            
-            char konfirmasi;
-            cout << "\nVerifikasi transaksi ini? (Y/T): ";
-            cin >> konfirmasi;
-            
-            if(konfirmasi == 'Y' || konfirmasi == 'y') {
-                dataTransaksi[i].status = "verified";
-                dataTransaksi[i].keterangan = " - Terverifikasi oleh admin";
-                saveTransaksiToFile();
-                updateSaldo();
-                cout << "Transaksi berhasil diverifikasi!\n";
-            } else {
-                cout << "Verifikasi dibatalkan.\n";
-            }
-            system("pause");
-            return;
-        }
-    }
-    
-    cout << "Transaksi tidak ditemukan atau sudah diverifikasi.\n";
-    system("pause");
-}
 
 void distribusiZakatKeMustahik() {
     system("cls");
     cout << "=== DISTRIBUSI ZAKAT KE MUSTAHIK ===\n\n";
     
-    // Tampilkan zakat yang sudah terverifikasi tapi belum didistribusi
-    cout << "ZAKAT SIAP DIDISTRIBUSIKAN:\n";
+    loadTransaksiFromFile();
+    loadMustahikFromFile();
+    
+    pengguna admin;
+    ifstream dataAmil("users.txt");
+    if(dataAmil.is_open()) {
+        dataAmil >> admin.id >> admin.username >> admin.password >> admin.saldo;
+        dataAmil.close();
+    }
+    
+    cout << "Saldo Zakat Tersedia: " << Rupiah(admin.saldo) << endl;
     cout << "============================\n";
     
-    // for(int i = 0; i < jumlahTransaksi; i++) {
-    //     if(dataTransaksi[i].status == "verified") {
-    //         adaZakatSiap = true;
-    //         cout << "Jenis: " << dataTransaksi[i].jenis_zakat << endl;
-    //         cout << "Jumlah: " << Rupiah(dataTransaksi[i].jumlah) << endl;
-    //         cout << "---------------------------\n";
-    //     }
-    // }
-    pengguna admin;
-    cout << "Saldo Zakat: " << Rupiah(admin.saldo) << endl;
-    
-    
-    if(admin.saldo<=0) {
+    if(admin.saldo <= 0) {
         cout << "Tidak ada zakat yang siap didistribusikan.\n";
         system("pause");
         return;
     }
     
-    // Tampilkan daftar mustahik
     cout << "\nDAFTAR MUSTAHIK:\n";
     cout << "===============\n";
-    for(int i = 0; i < jumlahMustahik; i++) {
-        cout << "ID: " << dataMustahik[i].id << endl;
-        cout << "Nama: " << dataMustahik[i].nama << endl;
-        cout << "Kategori: " << dataMustahik[i].kategori << endl;
-        cout << "Total Diterima: " << Rupiah(dataMustahik[i].total_diterima) << endl;
-        cout << "---------------------------\n";
+    if(jumlahMustahik == 0) {
+        cout << "Belum ada data mustahik.\n";
+        cout << "Silakan tambah mustahik terlebih dahulu.\n";
+        system("pause");
+        return;
     }
-    long long nominalTransaksi;
+    
+    for(int i = 0; i < jumlahMustahik; i++) {
+        cout << "ID: " << dataMustahik[i].id << endl
+             << " | Nama: " << padRight(dataMustahik[i].nama, 20) << endl
+             << " | Kategori: " << padRight(dataMustahik[i].kategori, 15) << endl
+             << " | Total Diterima: " << Rupiah(dataMustahik[i].total_diterima) << endl;
+    }
+    
+    long long nominalDistribusi;
     int idMustahik;
-    cout << "Masukkan ID Mustahik penerima: ";
+    
+    cout << "\nMasukkan ID Mustahik penerima: ";
     cin >> idMustahik;
-    cout << "\nMasukkan Nominal Transaksi: ";
-    cin >> nominalTransaksi;
+    cout << "Masukkan Nominal Distribusi (Rp): ";
+    cin >> nominalDistribusi;
     
-    // Cari transaksi
-    // int idxTransaksi = -1;
-    // for(int i = 0; i < jumlahTransaksi; i++) {
-    //     if(dataTransaksi[i].id == idTransaksi && dataTransaksi[i].status == "verified") {
-    //         idxTransaksi = i;
-    //         break;
-    //     }
-    // }
+    if(nominalDistribusi <= 0) {
+        cout << "Nominal distribusi harus lebih dari 0.\n";
+        system("pause");
+        return;
+    }
     
-    // Cari mustahik
     int idxMustahik = -1;
     for(int i = 0; i < jumlahMustahik; i++) {
         if(dataMustahik[i].id == idMustahik) {
@@ -754,40 +893,81 @@ void distribusiZakatKeMustahik() {
         }
     }
     
-    if(admin.saldo<nominalTransaksi) {
-        cout << "Saldo Tidak Mencukupi.\n";
+    if(admin.saldo < nominalDistribusi) {
+        cout << "Saldo tidak mencukupi.\n";
+        cout << "Saldo tersedia: " << Rupiah(admin.saldo) << endl;
+        cout << "Kekurangan: " << Rupiah(nominalDistribusi - admin.saldo) << endl;
     } else if(idxMustahik == -1) {
-        cout << "Mustahik tidak ditemukan.\n";
+        cout << "Mustahik dengan ID " << idMustahik << " tidak ditemukan.\n";
     } else {
-        cout << "\nKonfirmasi Distribusi:\n";
-        cout << "Transaksi Zakat Mal"
-             << " sebesar " << Rupiah(nominalTransaksi) << endl;
-        cout << "Penerima: " << dataMustahik[idxMustahik].nama 
+        cout << "\n=== KONFIRMASI DISTRIBUSI ===\n";
+        cout << "Penerima     : " << dataMustahik[idxMustahik].nama 
              << " (" << dataMustahik[idxMustahik].kategori << ")\n";
+        cout << "Alamat       : " << dataMustahik[idxMustahik].alamat << endl;
+        cout << "Nominal      : " << Rupiah(nominalDistribusi) << endl;
+        cout << "Saldo sebelum: " << Rupiah(admin.saldo) << endl;
+        cout << "Saldo sesudah: " << Rupiah(admin.saldo - nominalDistribusi) << endl;
         
         char konfirmasi;
-        cout << "Distribusikan zakat? (Y/T): ";
+        cout << "\nLanjutkan distribusi? (Y/T): ";
         cin >> konfirmasi;
         
         if(konfirmasi == 'Y' || konfirmasi == 'y') {
-            // Update transaksi
-            // dataTransaksi[idxTransaksi].status = "distributed";
-            // dataTransaksi[idxTransaksi].id_penerima = idMustahik;
-            // dataTransaksi[idxTransaksi].keterangan = " - Didistribusikan ke " + dataMustahik[idxMustahik].nama;
+            pengguna users[10000];
+            int jumlahUser = 0;
             
-            // Update mustahik
-            dataMustahik[idxMustahik].total_diterima += nominalTransaksi;
+            ifstream bacaUser("users.txt");
+            while(bacaUser >> users[jumlahUser].id 
+                  >> users[jumlahUser].username 
+                  >> users[jumlahUser].password 
+                  >> users[jumlahUser].saldo) {
+                jumlahUser++;
+            }
+            bacaUser.close();
+            
+            if(jumlahUser > 0) {
+                users[0].saldo -= nominalDistribusi;
+                admin.saldo = users[0].saldo;
+            }
+            
+            ofstream tulisUser("users.txt");
+            for(int i = 0; i < jumlahUser; i++) {
+                tulisUser << users[i].id << " "
+                         << users[i].username << " "
+                         << users[i].password << " "
+                         << users[i].saldo << endl;
+            }
+            tulisUser.close();
+            
+            transaksi t;
+            t.id = (jumlahTransaksi == 0) ? 1 : dataTransaksi[jumlahTransaksi-1].id + 1;
+            t.id_pembayar = 1; 
+            t.jenis_zakat = "Distribusi";
+            t.jumlah = nominalDistribusi;
+            t.tanggal = getCurrentDate();
+            t.status = "distributed";
+            t.id_penerima = idMustahik;
+            t.keterangan = "Distribusi zakat ke " + dataMustahik[idxMustahik].nama;
+            
+            dataTransaksi[jumlahTransaksi++] = t;
+            
+          dataMustahik[idxMustahik].total_diterima += nominalDistribusi;
             dataMustahik[idxMustahik].tanggal_terakhir = getCurrentDate();
             
-            // saveTransaksiToFile();
+            saveTransaksiToFile();
             saveMustahikToFile();
             updateSaldo();
             
-            cout << "Distribusi zakat berhasil!\n";
+            cout << "\nDistribusi berhasil!\n";
+            cout << "Transaksi ID: " << t.id << endl;
+            cout << "Mustahik: " << dataMustahik[idxMustahik].nama 
+                 << " menerima " << Rupiah(nominalDistribusi) << endl;
+            cout << "Saldo kas zakat sekarang: " << Rupiah(admin.saldo) << endl;
         } else {
             cout << "Distribusi dibatalkan.\n";
         }
     }
+    
     system("pause");
 }
 
@@ -827,9 +1007,42 @@ void monitoringSaldoKasZakat() {
     cin.ignore();
     cin.get();
 }
-
-void kelolaDataMustahik() {
+void tampilkanDataMustahik(){
     system("cls");
+                cout << "=== DAFTAR MUSTAHIK ===\n\n";
+                
+                if(jumlahMustahik == 0) {
+                    cout << "Belum ada data mustahik.\n";
+                } else {
+                    // Header tabel
+                    cout << "+-----+--------------------+--------------------+--------------------+--------------------+\n";
+                    cout << "| ID  | Nama               | Kategori           | Total Diterima     | Tanggal Terakhir   |\n";
+                    cout << "+-----+--------------------+--------------------+--------------------+--------------------+\n";
+                    
+                    for(int i = 0; i < jumlahMustahik; i++) {
+                        string nama = dataMustahik[i].nama;
+                        if(nama.length() > 18) nama = nama.substr(0, 15) + "...";
+                        
+                        string kategori = dataMustahik[i].kategori;
+                        if(kategori.length() > 18) kategori = kategori.substr(0, 15) + "...";
+                        
+                        string total = Rupiah(dataMustahik[i].total_diterima);
+                        if(total.length() > 18) total = total.substr(0, 15) + "...";
+                        
+                        string tanggal = dataMustahik[i].tanggal_terakhir;
+                        if(tanggal.length() > 18) tanggal = tanggal.substr(0, 15) + "...";
+                        
+                        cout << "| " << padLeft(to_string(dataMustahik[i].id), 3) << " "
+                             << "| " << padRight(nama, 18) << " "
+                             << "| " << padRight(kategori, 18) << " "
+                             << "| " << padRight(total, 18) << " "
+                             << "| " << padRight(tanggal, 18) << " |\n";
+                    }
+                    cout << "+-----+--------------------+--------------------+--------------------+--------------------+\n";
+                }
+            }
+            void kelolaDataMustahik() {
+                system("cls");
     int pilihan;
     
     do {
@@ -877,46 +1090,16 @@ void kelolaDataMustahik() {
             }
             
             case 2: { // Tampilkan Semua Mustahik
-                system("cls");
-                cout << "=== DAFTAR MUSTAHIK ===\n\n";
-                
-                if(jumlahMustahik == 0) {
-                    cout << "Belum ada data mustahik.\n";
-                } else {
-                    // Header tabel
-                    cout << "+-----+--------------------+--------------------+--------------------+--------------------+\n";
-                    cout << "| ID  | Nama               | Kategori           | Total Diterima     | Tanggal Terakhir   |\n";
-                    cout << "+-----+--------------------+--------------------+--------------------+--------------------+\n";
-                    
-                    for(int i = 0; i < jumlahMustahik; i++) {
-                        string nama = dataMustahik[i].nama;
-                        if(nama.length() > 18) nama = nama.substr(0, 15) + "...";
-                        
-                        string kategori = dataMustahik[i].kategori;
-                        if(kategori.length() > 18) kategori = kategori.substr(0, 15) + "...";
-                        
-                        string total = Rupiah(dataMustahik[i].total_diterima);
-                        if(total.length() > 18) total = total.substr(0, 15) + "...";
-                        
-                        string tanggal = dataMustahik[i].tanggal_terakhir;
-                        if(tanggal.length() > 18) tanggal = tanggal.substr(0, 15) + "...";
-                        
-                        cout << "| " << padLeft(to_string(dataMustahik[i].id), 3) << " "
-                             << "| " << padRight(nama, 18) << " "
-                             << "| " << padRight(kategori, 18) << " "
-                             << "| " << padRight(total, 18) << " "
-                             << "| " << padRight(tanggal, 18) << " |\n";
-                    }
-                    cout << "+-----+--------------------+--------------------+--------------------+--------------------+\n";
-                }
-                
+                tampilkanDataMustahik();
                 cout << "\nTekan Enter untuk kembali...";
                 cin.ignore();
                 cin.get();
                 break;
+                
             }
             
-            case 3: { // Edit Data Mustahik
+            case 3: { 
+                tampilkanDataMustahik();
                 int id;
                 cout << "\nMasukkan ID Mustahik yang akan diedit: ";
                 cin >> id;
@@ -961,7 +1144,7 @@ void kelolaDataMustahik() {
                 break;
             }
             
-            case 4: { // Hapus Mustahik
+            case 4: { 
                 int id;
                 cout << "\nMasukkan ID Mustahik yang akan dihapus: ";
                 cin >> id;
@@ -975,7 +1158,6 @@ void kelolaDataMustahik() {
                         cin >> konfirmasi;
                         
                         if(konfirmasi == 'Y' || konfirmasi == 'y') {
-                            // Geser elemen array
                             for(int j = i; j < jumlahMustahik - 1; j++) {
                                 dataMustahik[j] = dataMustahik[j + 1];
                             }
@@ -996,7 +1178,7 @@ void kelolaDataMustahik() {
                 break;
             }
             
-            case 5: { // Cari Mustahik
+            case 5: { 
                 string keyword;
                 cout << "\nMasukkan nama atau kategori mustahik: ";
                 cin.ignore();
@@ -1051,7 +1233,14 @@ void generateLaporanBulanan() {
     cin >> bulan;
     cout << "Masukkan tahun (YYYY): ";
     cin >> tahun;
-    
+    if(bulan.length() == 1) {
+    bulan = "0" + bulan;
+    }
+    if(tahun.length() == 2) {
+    tahun = "20" + tahun;
+    }
+    loadTransaksiFromFile();
+    loadMustahikFromFile();
     // Filter transaksi berdasarkan bulan/tahun
     long long totalMasuk = 0, totalKeluar = 0;
     int countMasuk = 0, countKeluar = 0;
@@ -1066,9 +1255,7 @@ void generateLaporanBulanan() {
     cout << "+---------------------------------------------------------------+\n";
     
     for(int i = 0; i < jumlahTransaksi; i++) {
-        if(dataTransaksi[i].tanggal.substr(5, 2) == bulan && 
-           dataTransaksi[i].tanggal.substr(0, 4) == tahun &&
-           (dataTransaksi[i].status == "verified" || dataTransaksi[i].status == "distributed")) {
+        if(dataTransaksi[i].tanggal.substr(5, 2) == bulan && dataTransaksi[i].tanggal.substr(0, 4) == tahun && dataTransaksi[i].status == "verified") {
             countMasuk++;
             totalMasuk += dataTransaksi[i].jumlah;
             cout << "| " << padRight(dataTransaksi[i].tanggal, 10)
@@ -1093,7 +1280,6 @@ void generateLaporanBulanan() {
             countKeluar++;
             totalKeluar += dataTransaksi[i].jumlah;
             
-            // Cari nama mustahik
             string namaPenerima = "Tidak diketahui";
             for(int j = 0; j < jumlahMustahik; j++) {
                 if(dataMustahik[j].id == dataTransaksi[i].id_penerima) {
@@ -1114,9 +1300,8 @@ void generateLaporanBulanan() {
         cout << "| Tidak ada transaksi keluar                             |\n";
     }
     
-    // Summary
     cout << "+---------------------------------------------------------------+\n";
-    cout << "|                         SUMMARY                             |\n";
+    cout << "|                         DETAIL TRANSAKSI                             |\n";
     cout << "+---------------------------------------------------------------+\n";
     cout << "| Jumlah Transaksi Masuk   : " << padRight(to_string(countMasuk), 40) << " |\n";
     cout << "| Total Zakat Masuk        : " << padRight(Rupiah(totalMasuk), 40) << " |\n";
@@ -1125,7 +1310,6 @@ void generateLaporanBulanan() {
     cout << "| Saldo Akhir              : " << padRight(Rupiah(totalMasuk - totalKeluar), 40) << " |\n";
     cout << "+---------------------------------------------------------------+\n\n";
     
-    // Opsi export ke file
     char exportFile;
     cout << "Export laporan ke file? (Y/T): ";
     cin >> exportFile;
@@ -1143,7 +1327,7 @@ void generateLaporanBulanan() {
             for(int i = 0; i < jumlahTransaksi; i++) {
                 if(dataTransaksi[i].tanggal.substr(5, 2) == bulan && 
                    dataTransaksi[i].tanggal.substr(0, 4) == tahun &&
-                   (dataTransaksi[i].status == "verified" || dataTransaksi[i].status == "distributed")) {
+                   dataTransaksi[i].status == "verified") {
                     file << dataTransaksi[i].tanggal << " - " 
                          << dataTransaksi[i].jenis_zakat << " - " 
                          << Rupiah(dataTransaksi[i].jumlah) << "\n";
@@ -1172,7 +1356,7 @@ void generateLaporanBulanan() {
                 }
             }
             
-            file << "\nSUMMARY:\n";
+            file << "\nDETAIL TRANSAKSI:\n";
             file << "--------\n";
             file << "Jumlah Transaksi Masuk  : " << countMasuk << "\n";
             file << "Total Zakat Masuk       : " << Rupiah(totalMasuk) << "\n";
@@ -1191,49 +1375,53 @@ void generateLaporanBulanan() {
     cin.ignore();
     cin.get();
 }
-
-void kirimPengingatZakat() {
+void editData(pengguna &user){
     system("cls");
-    cout << "=== KIRIM PENGINGAT ZAKAT ===\n\n";
+    long long topUp;
+    string pass;
     
-    // Cari pengguna yang memiliki harta wajib zakat tapi belum bayar
-    ifstream fileHarta("penghasilan.txt");
-    if(!fileHarta.is_open()) {
-        cout << "Belum ada data harta pengguna.\n";
-        system("pause");
-        return;
-    }
+    cout << "=== TOP UP SALDO ===" << endl;
+    cout << "Masukkan Nominal top up (Rp): ";
+    cin >> topUp;
+    cout << "Password: ";
+    cin >> pass;
     
-    cout << "DAFTAR PENGINGAT ZAKAT YANG PERLU DIKIRIM:\n";
-    cout << "==========================================\n\n";
-    
-    // Ini contoh sederhana, dalam implementasi real perlu cek haul
-    cout << "Pengingat akan dikirim ke pengguna yang:\n";
-    cout << "1. Memiliki harta melebihi nisab\n";
-    cout << "2. Belum membayar zakat tahun ini\n";
-    cout << "3. Sudah melewati masa haul (1 tahun)\n\n";
-    
-    // Simulasi data
-    cout << "Contoh pesan pengingat:\n";
-    cout << "-----------------------\n";
-    cout << "Kepada Yth. Bapak/Ibu Muzakki,\n";
-    cout << "Ini adalah pengingat bahwa Anda memiliki kewajiban zakat.\n";
-    cout << "Silakan bayar zakat melalui aplikasi Amil Zakat.\n";
-    cout << "Terima kasih.\n\n";
-    
-    char konfirmasi;
-    cout << "Kirim pengingat ke semua pengguna? (Y/T): ";
-    cin >> konfirmasi;
-    
-    if(konfirmasi == 'Y' || konfirmasi == 'y') {
-        // Simpan log pengiriman
-        ofstream logFile("log_pengingat.txt", ios::app);
-        logFile << getCurrentDate() << " - Pengingat zakat dikirim ke semua pengguna\n";
-        logFile.close();
+    if(user.password == pass){
+        user.saldo += topUp;
         
-        cout << "Pengingat berhasil dikirim!\n";
+        pengguna users[10000];
+        int jumlahUser = 0;
+        
+        ifstream baca("users.txt");
+        while(baca >> users[jumlahUser].id 
+              >> users[jumlahUser].username 
+              >> users[jumlahUser].password 
+              >> users[jumlahUser].saldo){
+            jumlahUser++;
+        }
+        baca.close();
+        
+        for(int i = 0; i < jumlahUser; i++){
+            if(users[i].id == user.id){
+                users[i].saldo = user.saldo;
+                break;
+            }
+        }
+        
+        ofstream tulis("users.txt");
+        for(int i = 0; i < jumlahUser; i++){
+            tulis << users[i].id << " "
+                  << users[i].username << " "
+                  << users[i].password << " "
+                  << users[i].saldo << endl;
+        }
+        tulis.close();
+        
+        cout << "Saldo berhasil ditambahkan!" << endl;
+        cout << "Saldo Sekarang: " << Rupiah(user.saldo) << endl;
+        
     } else {
-        cout << "Pengiriman dibatalkan.\n";
+        cout << "Password salah! Saldo gagal ditambahkan!" << endl;
     }
     
     system("pause");
@@ -1263,7 +1451,6 @@ return hasil;
 
 
 void menuAdminLengkap(int nomorPilihan) {
-    // Load data saat pertama kali masuk
     loadTransaksiFromFile();
     loadMustahikFromFile();
     updateSaldo();
@@ -1276,7 +1463,7 @@ void menuAdminLengkap(int nomorPilihan) {
         switch(nomorPilihan){
             case 1:
             cout << "1. Distribusi Zakat ke Mustahik" << endl;
-            cout << "2. Kirim Pengingat Zakat" << endl;
+            cout << "2. Lihat Panduan Zakat" << endl;
             break;
             case 2:
             cout << "3. Kelola Data Mustahik" << endl;
@@ -1297,7 +1484,7 @@ void menuAdminLengkap(int nomorPilihan) {
                 distribusiZakatKeMustahik();
                 break;
             case 2:
-                kirimPengingatZakat();
+                panduanZakat();
                 break;
             case 3:
                 kelolaDataMustahik();
@@ -1309,7 +1496,6 @@ void menuAdminLengkap(int nomorPilihan) {
                 generateLaporanBulanan();
                 break;
             case 6:
-                // Save semua data sebelum keluar
                 saveTransaksiToFile();
                 saveMustahikToFile();
                 cout << "Kembali ke menu utama...\n";
@@ -1322,49 +1508,37 @@ void menuAdminLengkap(int nomorPilihan) {
     } while(pilihan != 6);
 }
 
-
 void tampilkanDashboard(pengguna &user){
     system("cls");
-    cout << "=== DASHBOARD " << user.username << " ==="<<endl;
-    cout << "Nama : " << user.username<<endl;
-    cout << "Saldo : " << Rupiah(user.saldo)<<endl;
+    cout << "=== DASHBOARD " << user.username << " ===" << endl;
+    cout << "Nama  : " << user.username << endl;
+    cout << "Saldo : " << Rupiah(user.saldo) << endl;
+    cout << "==================================\n";
     
-    long long totalPenghasilan = 0;
-    long long totalZakat = 0;
-    bool adaData = false;
-    ifstream filePenghasilan("penghasilan.txt");
-    if(filePenghasilan.is_open()){
-        penghasilan data;
-        string pekerjaan;
-        while(filePenghasilan >> data.id >> data.id_user >> pekerjaan 
-              >> data.modal >> data.gajiBulanan >> data.piutang 
-              >> data.utang >> data.kebutuhan){
-            
-            // Hanya ambil data user ini menuDash
-            if(data.id_user == user.id){
-                data.pekerjaan = pekerjaan;
-                // Hitung zakat penghasilan
-                long long zakat = zakatPenghasilan(data);
-                totalPenghasilan += data.gajiBulanan * 12;
-                totalZakat += zakat;
-                adaData = true;
-            }
+    loadTransaksiFromFile();
+    long long totalZakatDibayar = 0;
+    int jumlahBayar = 0;
+    
+    for(int i = 0; i < jumlahTransaksi; i++) {
+        if(dataTransaksi[i].id_pembayar == user.id && 
+           dataTransaksi[i].status == "verified") {
+            totalZakatDibayar += dataTransaksi[i].jumlah;
+            jumlahBayar++;
         }
-        filePenghasilan.close();
     }
     
-    if(adaData){
-        cout << "Total Penghasilan Pertahun: " << Rupiah(totalPenghasilan) << endl;
-        cout << "Total Zakat yang Harus Dibayar: " << Rupiah(totalZakat) << endl;
-        cout << "Status: " << (totalZakat > 0 ? "WAJIB ZAKAT" : "Tidak Wajib Zakat") << endl;
-    } else {
-        cout << "Belum ada data penghasilan yang diinput.\n";
-        cout << "Silakan input data terlebih dahulu di menu Dashboard.\n";
-    }
-
-    cout << "\nTekan Enter untuk kembali...";
-    cin.ignore();
-    cin.get();
+    cout << "\nSTATISTIK ZAKAT ANDA:\n";
+    cout << "Jumlah pembayaran zakat : " << jumlahBayar << " kali\n";
+    cout << "Total zakat dibayarkan  : " << Rupiah(totalZakatDibayar) << endl;
+    
+    cout << "\n==================================\n";
+    cout << "PILIHAN MENU:\n";
+    cout << "1. Lihat Riwayat Pembayaran Zakat\n";
+    cout << "2. Panduan Zakat\n";
+    cout << "3. Kalkulator Zakat\n";
+    cout << "4. Top Up Saldo\n";
+    cout << "5. Kembali ke Menu Utama\n";
+    cout << "Pilihan: ";
 }
 int menuJenisZakat(){
     system("cls");
@@ -1383,15 +1557,12 @@ int menuJenisZakat(){
     return pilihan;
 }
 
-int menuDashboard(pengguna &user){
-    tampilkanDashboard(user);
-    cout << "== PILIH MENU ==="<<endl;
-    cout <<"1. Input Data\n";
-    cout <<"2. Top Up saldo\n";
-    cout <<"3. Kembali\n";
+int menuDashboard(pengguna &user){    
     int pilihan;
-    cout << "Pilih Nomor: ";
-    cin >> pilihan;
+    do {
+        tampilkanDashboard(user);
+        cin >> pilihan;
+    } while(pilihan > 5 || pilihan < 1);
     return pilihan;
 }
 void bayarZakat(pengguna &user){
@@ -1477,7 +1648,6 @@ void bayarZakat(pengguna &user){
         cout << "Password salah! Gagal membayar zakat!" << endl;
     }
     
-    system("pause");
 }
 
 void inputData(pengguna &user){
@@ -1838,57 +2008,7 @@ void inputData(pengguna &user){
 }
 
 
-void editData(pengguna &user){
-    system("cls");
-    long long topUp;
-    string pass;
-    
-    cout << "=== TOP UP SALDO ===" << endl;
-    cout << "Masukkan Nominal top up (Rp): ";
-    cin >> topUp;
-    cout << "Password: ";
-    cin >> pass;
-    
-    if(user.password == pass){
-        user.saldo += topUp;
-        
-        pengguna users[10000];
-        int jumlahUser = 0;
-        
-        ifstream baca("users.txt");
-        while(baca >> users[jumlahUser].id 
-              >> users[jumlahUser].username 
-              >> users[jumlahUser].password 
-              >> users[jumlahUser].saldo){
-            jumlahUser++;
-        }
-        baca.close();
-        
-        for(int i = 0; i < jumlahUser; i++){
-            if(users[i].id == user.id){
-                users[i].saldo = user.saldo;
-                break;
-            }
-        }
-        
-        ofstream tulis("users.txt");
-        for(int i = 0; i < jumlahUser; i++){
-            tulis << users[i].id << " "
-                  << users[i].username << " "
-                  << users[i].password << " "
-                  << users[i].saldo << endl;
-        }
-        tulis.close();
-        
-        cout << "Saldo berhasil ditambahkan!" << endl;
-        cout << "Saldo Sekarang: " << Rupiah(user.saldo) << endl;
-        
-    } else {
-        cout << "Password salah! Saldo gagal ditambahkan!" << endl;
-    }
-    
-    system("pause");
-}
+
 void handleMenu(pengguna &user){
     bool isAdmin = user.username == "AmilZakat";
     int pilihanMenu;
@@ -1908,12 +2028,18 @@ void handleMenu(pengguna &user){
                         
                         switch(menuDash){
                             case 1:
-                                inputData(user);
+                                riwayatPembayaranZakat(user);
                                 break;
                             case 2:
-                                editData(user);
+                                panduanZakat();
                                 break;
                             case 3:
+                                inputData(user); 
+                                break;
+                            case 4:
+                                editData(user);
+                                break;
+                            case 5:
                                 cout << "Kembali ke menu utama...\n";
                                 break;
                             default:
@@ -1921,7 +2047,7 @@ void handleMenu(pengguna &user){
                                 system("pause");
                                 break;
                         }
-                    } while(menuDash != 3);
+                    } while(menuDash != 5);
                 }
                 break;
                 
@@ -2054,4 +2180,3 @@ handleMenu(pengguna);
 }
 cout <<"Selesai"<<endl;
 }
-
