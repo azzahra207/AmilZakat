@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <fstream>
 #include <ctime>
 using namespace std;
@@ -219,7 +220,7 @@ int jumlahMustahik = 0;
 
 
 
-// ==================== FUNGSI BANTUAN ====================
+/////////////////////////////////// FUNGSI BANTUAN/////////////////////////////////
 string Rupiah(long long uang){
     string strUang =to_string(uang);
     string hasil;
@@ -243,7 +244,64 @@ int autoIncrement(string nameFile){
     bacaDatabase2.close();
     return hasilId;
 }
+string replaceSpasi(const string &input) {
+    char *result = new char[input.length() + 1];
+    strcpy(result, input.c_str());
+    for(int i = 0; result[i] != '\0'; i++) {
+        if(result[i] == ' ') {
+            result[i] = '_';
+        }
+    }
+    string finalResult(result);
+    delete[] result;
+    return finalResult;
+}
+string replaceToSpasi(const string &input) {
+    char *result = new char[input.length() + 1];
+    strcpy(result, input.c_str());
+    for(int i = 0; result[i] != '\0'; i++) {
+        if(result[i] == '_') {
+            result[i] = ' ';
+        }
+    }
+    string finalResult(result);
+    delete[] result;
+    return finalResult;
+}
+void lower(string &str, int i = 0) {
+    int jmlChar=str.length();
+    if (i >= jmlChar) {
+        return;
+    }  
+    if (str[i] >= 'A' && str[i] <= 'Z') {
+        str[i] = str[i] + 32;
+    }
+    lower(str, i + 1);
+}
 
+string getTerjemahanNiat(string jenisZakat) {
+    if (jenisZakat == "penghasilan" || jenisZakat == "perusahaan") {
+        return "Aku niat mengeluarkan zakat penghasilanku, fardhu karena Allah Ta'ala";
+    } else if (jenisZakat == "perhiasan" || jenisZakat == "emas" || jenisZakat == "perak") {
+        return "Aku niat mengeluarkan zakat perhiasanku, fardhu karena Allah Ta'ala";
+    } else if (jenisZakat == "pertanian" || jenisZakat == "beras_putih" || jenisZakat == "padi_gagang" || 
+               jenisZakat == "padi_kretek" || jenisZakat == "kacang_hijau" || 
+               jenisZakat == "kacang_tunggak") {
+        return "Aku niat mengeluarkan zakat hasil pertanianku, fardhu karena Allah Ta'ala";
+    } else if (jenisZakat == "tanaman_produktif_dan_perikanan") {
+        return "Aku niat mengeluarkan zakat hasil kebunku, fardhu karena Allah Ta'ala";
+    } else if (jenisZakat == "properti") {
+        return "Aku niat mengeluarkan zakat propertiku, fardhu karena Allah Ta'ala";
+    } else if (jenisZakat == "barang_temuan" || jenisZakat == "rikaz") {
+        return "Aku niat mengeluarkan zakat barang temuanku, fardhu karena Allah Ta'ala";
+    } else if (jenisZakat == "peternakan" || jenisZakat == "sapi" || jenisZakat == "kambing" || jenisZakat == "unta") {
+        return "Aku niat mengeluarkan zakat ternakku, fardhu karena Allah Ta'ala";
+    } else if (jenisZakat == "fitrah") {
+        return "Aku niat mengeluarkan zakat fitrah untuk diriku, fardhu karena Allah Ta'ala";
+    } else {
+        return "Aku niat mengeluarkan zakat hartaku, fardhu karena Allah Ta'ala";
+    }
+}
 long long cariNisabLong(string nama, int i=0){
     dataNisab datanisab;
     if(i>=15)
@@ -667,7 +725,7 @@ void panduanZakat() {
                 cout << "+----+----------------------------+----------------+----------+\n";
 
                 for(int i = 0; i < 15; i++) {
-                    string jenis = nisab.nama[i];
+                    string jenis = replaceToSpasi(nisab.nama[i]);
                     if(jenis.length() > 25) jenis = jenis.substr(0, 22) + "...";
                     string strNisab;
                     if(nisab.nisab[i] == (long long)nisab.nisab[i]) {
@@ -773,7 +831,7 @@ void panduanZakat() {
 
 
 void saveTransaksiToFile() {
-    ofstream file("transaksi.txt", ios::app);
+    ofstream file("transaksi.txt");
     for(int i = 0; i < jumlahTransaksi; i++) {
         file << dataTransaksi[i].id << " "
              << dataTransaksi[i].id_pembayar << " "
@@ -781,7 +839,7 @@ void saveTransaksiToFile() {
              << dataTransaksi[i].jumlah << " "
              << dataTransaksi[i].tanggal << " "
              << dataTransaksi[i].status << " "
-             << dataTransaksi[i].id_penerima
+             << dataTransaksi[i].id_penerima << " "
              << dataTransaksi[i].keterangan << endl;
     }
     file.close();
@@ -802,7 +860,7 @@ void loadMustahikFromFile() {
 }
 
 void saveMustahikToFile() {
-    ofstream file("mustahik.txt",ios::app);
+    ofstream file("mustahik.txt");
     for(int i = 0; i < jumlahMustahik; i++) {
         file << dataMustahik[i].id << " "
              << dataMustahik[i].nama << " "
@@ -810,7 +868,7 @@ void saveMustahikToFile() {
              << dataMustahik[i].alamat << " "
              << dataMustahik[i].telepon << " "
              << dataMustahik[i].total_diterima << " "
-             << dataMustahik[i].tanggal_terakhir
+             << dataMustahik[i].tanggal_terakhir << " "
              << dataMustahik[i].keterangan << endl;
     }
     file.close();
@@ -841,7 +899,7 @@ string getCurrentDate() {
     return string(frmDate);
 }
 
-// ==================== FUNGSI MENU ADMIN ====================
+/////////////////////////////////// FUNGSI MENU ADMIN/////////////////////////////////
 
 void distribusiZakatKeMustahik() {
     system("cls");
@@ -1028,10 +1086,10 @@ void tampilkanDataMustahik(){
                     cout << "+-----+--------------------+--------------------+--------------------+--------------------+\n";
                     
                     for(int i = 0; i < jumlahMustahik; i++) {
-                        string nama = dataMustahik[i].nama;
+                        string nama = replaceToSpasi(dataMustahik[i].nama);
                         if(nama.length() > 18) nama = nama.substr(0, 15) + "...";
                         
-                        string kategori = dataMustahik[i].kategori;
+                        string kategori = replaceToSpasi(dataMustahik[i].kategori);
                         if(kategori.length() > 18) kategori = kategori.substr(0, 15) + "...";
                         
                         string total = Rupiah(dataMustahik[i].total_diterima);
@@ -1072,18 +1130,23 @@ void tampilkanDataMustahik(){
                 cout << "Nama: ";
                 cin.ignore();
                 getline(cin, baru.nama);
-                
+                lower(baru.nama);
+                baru.nama=replaceSpasi(baru.nama);
+
                 cout << "Kategori (fakir/miskin/amil/muallaf/riqab/gharimin/fisabilillah/ibnu sabil): ";
                 getline(cin, baru.kategori);
+                baru.kategori=replaceSpasi(baru.kategori);
                 
                 cout << "Alamat: ";
                 getline(cin, baru.alamat);
+                baru.alamat=replaceSpasi(baru.alamat);
                 
                 cout << "Telepon: ";
                 getline(cin, baru.telepon);
                 
                 cout << "Keterangan: ";
                 getline(cin, baru.keterangan);
+                baru.keterangan=replaceSpasi(baru.keterangan);
                 
                 baru.id = (jumlahMustahik == 0) ? 1 : dataMustahik[jumlahMustahik-1].id + 1;
                 baru.total_diterima = 0;
@@ -1115,28 +1178,41 @@ void tampilkanDataMustahik(){
                 bool found = false;
                 for(int i = 0; i < jumlahMustahik; i++) {
                     if(dataMustahik[i].id == id) {
+                        string show;
                         found = true;
                         cout << "\nEdit Data Mustahik ID: " << id << endl;
-                        cout << "Nama [" << dataMustahik[i].nama << "]: ";
+                        show=replaceToSpasi(dataMustahik[i].nama);
+                        cout << "Nama [" << show << "]: ";
                         cin.ignore();
                         string input;
                         getline(cin, input);
+                        lower(input);
+                        input = replaceSpasi(input);
                         if(!input.empty()) dataMustahik[i].nama = input;
                         
-                        cout << "Kategori [" << dataMustahik[i].kategori << "]: ";
+                        show=replaceToSpasi(dataMustahik[i].kategori);
+                        cout << "Kategori [" << show << "]: ";
                         getline(cin, input);
+                        lower(input);
+                        input = replaceSpasi(input);
                         if(!input.empty()) dataMustahik[i].kategori = input;
                         
-                        cout << "Alamat [" << dataMustahik[i].alamat << "]: ";
+                        show=replaceToSpasi(dataMustahik[i].alamat);
+                        cout << "Alamat [" << show << "]: ";
                         getline(cin, input);
+                        lower(input);
+                        input = replaceSpasi(input);
                         if(!input.empty()) dataMustahik[i].alamat = input;
                         
                         cout << "Telepon [" << dataMustahik[i].telepon << "]: ";
                         getline(cin, input);
                         if(!input.empty()) dataMustahik[i].telepon = input;
                         
-                        cout << "Keterangan [" << dataMustahik[i].keterangan << "]: ";
+                        show=replaceToSpasi(dataMustahik[i].keterangan);
+                        cout << "Keterangan [" << show << "]: ";
                         getline(cin, input);
+                        lower(input);
+                        input = replaceSpasi(input);
                         if(!input.empty()) dataMustahik[i].keterangan = input;
                         
                         saveMustahikToFile();
@@ -1153,6 +1229,7 @@ void tampilkanDataMustahik(){
             }
             
             case 4: { 
+                tampilkanDataMustahik();
                 int id;
                 cout << "\nMasukkan ID Mustahik yang akan dihapus: ";
                 cin >> id;
@@ -1191,7 +1268,8 @@ void tampilkanDataMustahik(){
                 cout << "\nMasukkan nama atau kategori mustahik: ";
                 cin.ignore();
                 getline(cin, keyword);
-                
+                lower(keyword);
+                keyword = replaceSpasi(keyword);
                 system("cls");
                 cout << "=== HASIL PENCARIAN MUSTAHIK ===\n\n";
                 
@@ -1199,15 +1277,20 @@ void tampilkanDataMustahik(){
                 for(int i = 0; i < jumlahMustahik; i++) {
                     if(dataMustahik[i].nama.find(keyword) != string::npos ||
                        dataMustahik[i].kategori.find(keyword) != string::npos) {
+                        string show;
                         found = true;
                         cout << "ID: " << dataMustahik[i].id << endl;
-                        cout << "Nama: " << dataMustahik[i].nama << endl;
-                        cout << "Kategori: " << dataMustahik[i].kategori << endl;
-                        cout << "Alamat: " << dataMustahik[i].alamat << endl;
+                        show = replaceToSpasi(dataMustahik[i].nama);
+                        cout << "Nama: " << show << endl;
+                        show = replaceToSpasi(dataMustahik[i].kategori);
+                        cout << "Kategori: " << show << endl;
+                        show = replaceToSpasi(dataMustahik[i].alamat);
+                        cout << "Alamat: " << show << endl;
                         cout << "Telepon: " << dataMustahik[i].telepon << endl;
                         cout << "Total Diterima: " << Rupiah(dataMustahik[i].total_diterima) << endl;
                         cout << "Tanggal Terakhir: " << dataMustahik[i].tanggal_terakhir << endl;
-                        cout << "Keterangan: " << dataMustahik[i].keterangan << endl;
+                        show = replaceToSpasi(dataMustahik[i].keterangan);
+                        cout << "Keterangan: " << show << endl;
                         cout << "---------------------------\n";
                     }
                 }
@@ -1227,7 +1310,7 @@ void tampilkanDataMustahik(){
             default:
                 cout << "Pilihan tidak valid!\n";
                 system("pause");
-                break;
+                continue;
         }
     } while(pilihan != 6);
 }
@@ -1435,7 +1518,7 @@ void editData(pengguna &user){
     system("pause");
 }
 
-// ==================== MENU ADMIN UTAMA ====================
+/////////////////////////////////// MENU ADMIN UTAMA/////////////////////////////////
 int menu(pengguna &user){
     system("cls");
     int hasil;
@@ -1583,7 +1666,9 @@ void bayarZakat(pengguna &user){
     cout << "Nominal Bayar (Rp): ";
     cin >> bayar;
     cout << "Jenis Zakat: ";
-    cin >> jenisZakat;
+    cin.ignore();
+    getline(cin,jenisZakat);
+    jenisZakat = replaceSpasi(jenisZakat);
     cout << "Password: ";
     cin >> pass;
     
@@ -1593,6 +1678,16 @@ void bayarZakat(pengguna &user){
             cout << "Kurang: " << Rupiah(bayar - user.saldo) << endl;
             return;
         } else {
+        cout << "============ BACA NIAT MEMBAYAR ZAKAT ============"<<endl;
+            cout << getTerjemahanNiat(jenisZakat) << endl;
+            cout << "=============================\n" << endl;
+            
+            char konfirmasi;
+            cout << "Apakah Anda sudah membaca niat dan ingin melanjutkan pembayaran? (Y/T): ";
+            cin >> konfirmasi;
+            
+            if(konfirmasi == 'Y' || konfirmasi == 'y') {
+                user.saldo -= bayar;
         user.saldo -= bayar;
         string amil[3];
         long long saldoAdmin;
@@ -1651,6 +1746,7 @@ void bayarZakat(pengguna &user){
         cout << "Anda berhasil membayar zakat" << endl;
         cout << "Saldo Sekarang: " << Rupiah(user.saldo) << endl;
     }
+    }
     } else {
         cout << "Password salah! Gagal membayar zakat!" << endl;
     }
@@ -1672,6 +1768,7 @@ void inputData(pengguna &user){
             cout << "Pekerjaan: ";
             cin.ignore();  
             getline(cin, data.pekerjaan);
+            data.pekerjaan = replaceSpasi(data.pekerjaan);
             cout << "Modal usaha (Rp): ";
             cin >> data.modal;
             cout << "Gaji bulanan (Rp): ";
@@ -1680,7 +1777,7 @@ void inputData(pengguna &user){
             cin >> data.piutang;
             cout << "Utang (Rp): ";
             cin >> data.utang;
-            cout << "Kebutuhan pokok per tahun (Rp): ";
+            cout << "Kebutuhan pokok per bulan (Rp): ";
             cin >> data.kebutuhan;
             
             long long zakat = zakatPenghasilan(data);
@@ -1849,10 +1946,8 @@ void inputData(pengguna &user){
             cout << "Utang yang belum dibayar (Rp): ";
             cin >> data.utang;
             
-            // Hitung zakat
             long long zakat = zakatTanaman(data);
             
-            // Simpan ke file
             ofstream file("tanaman.txt", ios::app);
             if(file.is_open()){
                 file << autoIncrement("tanaman.txt") << " "
@@ -2090,6 +2185,8 @@ void handleMenu(pengguna &user){
     }
 }
 int main(){
+    loadTransaksiFromFile();
+    loadMustahikFromFile();
     dataNisab dataNisab;
     ofstream catatNisab;
     catatNisab.open("dataNisab.txt");
