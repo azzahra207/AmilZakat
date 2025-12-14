@@ -1732,7 +1732,6 @@ void bayarZakat(pengguna &user){
             
             if(konfirmasi == 'Y' || konfirmasi == 'y') {
                 user.saldo -= bayar;
-        user.saldo -= bayar;
         string amil[3];
         long long saldoAdmin;
         ifstream bacaAdmin("users.txt");
@@ -2345,3 +2344,4 @@ handleMenu(pengguna);
 }
 cout <<"Selesai"<<endl;
 }
+
