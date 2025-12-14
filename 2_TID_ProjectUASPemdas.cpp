@@ -465,28 +465,72 @@ string zakatTernak(ternak &row){
                         return hasil;
                     }     
                 
-            } else if(row.jumlah>120){
-                return "3 ekor unta betina bintu labun (usia 2 tahun)";
-            } else if(row.jumlah>90){
-                return "2 ekor unta betina hiqqah (usia 3 tahun)";
-            } else if(row.jumlah>75){
-                return "2 ekor unta betina bintu labun (usia 2 tahun)";
-            } else if(row.jumlah>60){
-                return "1 ekor unta betina hiqqah (usia 4 tahun)";
-            } else if(row.jumlah>45){
-                return "1 ekor unta betina hiqqah (usia 3 tahun)";
-            } else if(row.jumlah>35){
-                return "1 ekor unta betina bintu labun (usia 2 tahun)";
-            } else if(row.jumlah>24){
-                return "1 ekor unta betina Bintu makhad (usia 1 tahun)";
-            } else if(row.jumlah>19){
-                return "4 ekor kambing umur 2 tahun, atau 4 ekor domba umur 1 tahun";
-            } else if(row.jumlah>14){
-                return "3 ekor kambing umur 2 tahun, atau 3 ekor domba umur 1 tahun";
-            } else if(row.jumlah>9){
-                return "2 ekor kambing umur 2 tahun, atau 2 ekor domba umur 1 tahun";
-            } else {
-                return "1 ekor kambing umur 2 tahun, atau 1 ekor domba umur 1 tahun";
+            } else if(row.jumlah>5){
+               string jenisUnta[4]={"bintu makhad","bintu labun", "hiqqah","hiqqah tua"};
+                struct zakatUnta{
+                    string hewan[3]={"unta betina","kambing","domba"};
+                    int usia[3]={0,2,1};
+                    int jumlahEkor[3]={0,1,1};  
+                };
+                zakatUnta zakatunta;
+                for(int i=9;i<=19;i+=5){
+                    if(row.jumlah>i){
+                        zakatunta.jumlahEkor[1]++;
+                        zakatunta.jumlahEkor[2]++;
+                    }
+                }
+                if(row.jumlah>24){
+                    zakatunta.jumlahEkor[1]=0;
+                    zakatunta.jumlahEkor[2]=0;
+                    zakatunta.jumlahEkor[0]++;
+                }
+                for(int i=24;i<=60;i+=10){
+                    if(i==55){
+                        i+=5;
+                    }
+                    if(row.jumlah>i){
+                        zakatunta.usia[0]++;
+                    }
+                    if(i==24){
+                        i++;
+                    }
+                }
+                if(row.jumlah>75){
+                    zakatunta.jumlahEkor[0]++;
+                    zakatunta.usia[0]=2;
+                }
+                if(row.jumlah>90){
+                    zakatunta.usia[0]++;
+                }
+                if(row.jumlah>120){
+                    zakatunta.usia[0]--;
+                    zakatunta.jumlahEkor[0]++;
+                }
+                string result;
+                for (int i=0;i<3;i++){
+                    if(zakatunta.jumlahEkor[i] > 0){
+                        string strTemp = to_string(zakatunta.jumlahEkor[i])+ " ekor ";
+                        strTemp += zakatunta.hewan[i];
+                        int usia=zakatunta.usia[i];
+                        strTemp += " ";
+                        result+=strTemp;
+                        if(zakatunta.hewan[i]=="unta betina"){
+                            strTemp = (string)jenisUnta[usia-1];
+                            strTemp += " ";
+                            result+=strTemp;
+                        }
+                        strTemp="(usia ";
+                        result+=strTemp;
+                        strTemp = to_string(zakatunta.usia[i]) + " tahun) ";
+                        result+=strTemp;
+                        if(i==1){
+                            result+="atau ";
+                        }
+                    }
+                }
+                return result;
+            } else{
+                return "Tidak wajib membayar zakat";
             }
             
         } else if(row.nama=="sapi"){
@@ -2248,23 +2292,7 @@ int main(){
         cout <<"--- Registrasi Akun ---"<< endl;
         cout << "Username (tidak boleh ada spasi): ";
         cin >> pengguna.username;
-        while(true){
-        cout << "Password (minimal 8 karakter): ";
-        cin >> pengguna.password;
-        string confirmPass;
-        cout << "Konfirmasi password: "<<endl;
-        cin >> confirmPass;
-        if(pengguna.password.length()<8){
-            if(pengguna.password!=confirmPass){
-            cout << "Konfirmasi Password tidak sesuai"<<endl;
-        }
-            cout << "Minimal 8 karakter"<<endl;
-        } else if(pengguna.password!=confirmPass){
-            cout << "Konfirmasi Password tidak sesuai"<<endl;
-        } else{
-            break;
-        }
-        };
+        
         ifstream bacaUser3;
         bool isUnique=true;
         bacaUser3.open("users.txt");
@@ -2276,6 +2304,22 @@ int main(){
             }
         }
         if(isUnique){
+            while(true){
+            cout << "Password (minimal 8 karakter): ";
+            cin >> pengguna.password;
+            if(pengguna.password.length()<8){
+                cout << "Kurang dari 8 karakter"<<endl;
+                continue;
+            }
+            string confirmPass;
+            cout << "Konfirmasi password: "<<endl;
+            cin >> confirmPass;
+            if(pengguna.password!=confirmPass){
+            cout << "Konfirmasi Password tidak sesuai"<<endl;
+            } else{
+                break;
+            }
+            };
             pengguna.id=autoIncrement("users.txt");
             ofstream appendUser1;
             pengguna.saldo=0;
